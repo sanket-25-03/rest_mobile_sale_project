@@ -3,10 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobile Store</title>
+    <title>Product List</title>
 </head>
 <body>
-    <h1>Welcome to the Mobile Store</h1>
-    <p>Find the best mobile phones here!</p>
+    <h1>Product List</h1>
+
+    {% if products %}
+        <ul>
+            {% for product in products %}
+                <li>
+                    <h2>{{ product.name }} - {{ product.brand }}</h2>
+                    <p><strong>Price:</strong> ${{ product.price }}</p>
+                    <p><strong>Description:</strong> {{ product.description }}</p>
+                    <p><strong>Quantity:</strong> {{ product.quantity }}</p>
+
+                    {% if product.prod_image %}
+                        <img src="{{ product.prod_image.url }}" alt="{{ product.name }}" width="100">
+                    {% else %}
+                        <p>No image available</p>
+                    {% endif %}
+
+                    <h3>Reviews:</h3>
+                    {% if product.reviews.all %}
+                        <ul>
+                            {% for review in product.reviews.all %}
+                                <li>
+                                    <p><strong>Rating:</strong> {{ review.rating }} / 5</p>
+                                    <p>{{ review.review_text }}</p>
+                                </li>
+                            {% empty %}
+                                <p>No reviews yet</p>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No reviews available</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No products available</p>
+    {% endif %}
 </body>
 </html>
