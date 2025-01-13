@@ -1,20 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product List</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-    </head>
-<body>
-    <!-- Loader -->
-    <div id="loader">
-        <div></div>
-    </div>
+{% extends 'base.html' %}
 
-    <!-- Product List -->
+{% block title %}Product List{% endblock %}
+
+{% block content %}
     <h1>Product List</h1>
 
     {% if products %}
@@ -33,35 +21,11 @@
                     {% endif %}
 
                     <h3>Reviews:</h3>
-                    {% if product.reviews.all %}
-                        <ul>
-                            {% for review in product.reviews.all %}
-                                <li>
-                                    <p><strong>Rating:</strong> {{ review.rating }} / 5</p>
-                                    <p>{{ review.review_text }}</p>
-                                </li>
-                            {% empty %}
-                                <p>No reviews yet</p>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p>No reviews available</p>
-                    {% endif %}
+                    {% include 'partials/reviews.html' with reviews=product.reviews.all %}
                 </li>
             {% endfor %}
         </ul>
     {% else %}
         <p class="no-data">No products available</p>
     {% endif %}
-
-    <!-- JavaScript to Remove Loader -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const loader = document.getElementById('loader');
-            setTimeout(() => {
-                loader.style.display = 'none';
-            }, 1000); // Adjust time as needed
-        });
-    </script>
-</body>
-</html>
+{% endblock %}
