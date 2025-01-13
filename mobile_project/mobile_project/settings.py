@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'mobile_sale',
     'django_filters',
 ]
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']  # Adjust based on your directory structure
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
