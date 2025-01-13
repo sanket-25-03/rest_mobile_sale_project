@@ -33,9 +33,13 @@
 1. **Frontend Setup**:
    - Initialize the frontend project using React (or static HTML/JavaScript if preferred).
    - Set up routing for the application with pages for:
+  
      - Product List
      - Add Product
+    
+     
      - Buy Product.
+     - product description
 
 2. **Page Development**:
    - **Product List Page**:
