@@ -165,3 +165,24 @@ button:hover {
     width: 100px;  /* Adjust logo size */
     height: auto;
 }
+
+
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.add-product-link {
+    text-decoration: none;
+    color: white;
+    background-color: #007bff;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+.add-product-link:hover {
+    background-color: #0056b3;
+}
