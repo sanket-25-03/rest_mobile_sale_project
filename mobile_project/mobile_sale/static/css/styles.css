@@ -246,3 +246,7 @@ button:hover {
     background-color: #ff9e00;
     transform: scale(1.05);
 }
+
+.add-product-container{
+    margin: 2px;
+}

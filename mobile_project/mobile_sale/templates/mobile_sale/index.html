@@ -29,6 +29,7 @@
                         <h3>Customer Reviews:</h3>
                         {% include 'partials/reviews.html' with reviews=product.reviews.all %}
                     </div>
+                    <a href="{% url 'order-create' %}" class="add-product-link">Order Now</a>
                 </div>               
             </li>
         {% endfor %}

@@ -63,3 +63,12 @@ def add_product_view(request):
         )
         return redirect('index') 
     return render(request, 'mobile_sale/AddProducts.html')
+
+def create_order_view(request):
+    if request.method == 'POST':
+        product_id = request.POST.get('product')
+        quantity = request.POST.get('quantity')
+        product = Product.objects.get(id=product_id)
+        Order.objects.create(product=product, quantity=quantity, username=request.user)
+        return redirect('order-list')
+    return render(request, 'mobile_sale/Order.html')
