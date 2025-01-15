@@ -6,7 +6,6 @@ from django.shortcuts import render, redirect
 from .models import Product, Order
 from .serializers import ProductSerializer, OrderSerializer
 
-
 class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -14,11 +13,9 @@ class ProductListView(generics.ListAPIView):
     ordering_fields = ['price', 'name']
     ordering = ['price']
 
-
 class ProductCreateView(generics.CreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-
 
 class OrderCreateView(CreateAPIView):
     queryset = Order.objects.all()
@@ -31,18 +28,13 @@ class OrderCreateView(CreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 def index(request):
-    # Fetch all products to display on the frontend
     products = Product.objects.all()
     return render(request, 'mobile_sale/index.html', {'products': products})
 
-
 def order_list(request):
-    # Fetch all orders to display on the frontend
     orders = Order.objects.all()
     return render(request, 'mobile_sale/orders.html', {'orders': orders})
-
 
 def add_product_view(request):
     if request.method == 'POST':
@@ -61,5 +53,14 @@ def add_product_view(request):
             quantity=quantity,
             prod_image=prod_image
         )
-        return redirect('index') 
+        return redirect('index')
     return render(request, 'mobile_sale/AddProducts.html')
+
+def create_order_view(request):
+    if request.method == 'POST':
+        product_id = request.POST.get('product')
+        quantity = request.POST.get('quantity')
+        product = Product.objects.get(id=product_id)
+        Order.objects.create(product=product, quantity=quantity, username=request.user)
+        return redirect('order-list')
+    return render(request, 'mobile_sale/Order.html')
