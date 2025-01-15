@@ -4,9 +4,10 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters import rest_framework as django_filters
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Product, Order
 from .serializers import ProductSerializer, OrderSerializer
+
 
 
 # Pagination for Products
@@ -58,8 +59,32 @@ class OrderCreateView(CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Render Index Page
+# Render Index Page with Product List
 def index(request):
     # Fetch all products to display on the frontend
     products = Product.objects.all()
     return render(request, 'mobile_sale/index.html', {'products': products})
+
+
+# Render Add Product Page
+def add_product_view(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        brand = request.POST.get('brand')
+        price = request.POST.get('price')
+        description = request.POST.get('description')
+        quantity = request.POST.get('quantity')
+        prod_image = request.FILES.get('prod_image')
+
+        # Save the product in the database
+        Product.objects.create(
+            name=name,
+            brand=brand,
+            price=price,
+            description=description,
+            quantity=quantity,
+            prod_image=prod_image
+        )
+        return redirect('index')  # Redirect to index page after adding a product
+
+    return render(request, 'mobile_sale/AddProducts.html')

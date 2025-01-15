@@ -3,7 +3,10 @@
 {% block title %}Product List{% endblock %}
 
 {% block content %}
-    <h1>Product List</h1>
+    <div class="header">
+        <h1>Product List</h1>
+        <a href="{% url 'add_product' %}" class="add-product-link">Add Product</a>
+    </div>
 
     {% if products %}
         <ul>
