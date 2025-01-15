@@ -247,6 +247,7 @@ button:hover {
     transform: scale(1.05);
 }
 
-.add-product-container{
+.add-product-link{
     margin: 2px;
+    padding: 5px 15px;
 }
