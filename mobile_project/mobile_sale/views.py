@@ -67,5 +67,4 @@ def add_product_view(request):
             prod_image=prod_image
         )
         return redirect('index') 
-
     return render(request, 'mobile_sale/AddProducts.html')
