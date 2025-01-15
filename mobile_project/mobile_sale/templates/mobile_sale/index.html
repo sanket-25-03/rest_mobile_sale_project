@@ -12,7 +12,6 @@
     <ul>
         {% for product in products %}
             <li class="product-item">
-                <!-- Product Image and Name -->
                 <div class="product-image">
                     {% if product.prod_image %}
                         <img src="{{ product.prod_image.url }}" alt="{{ product.name }}">
@@ -23,16 +22,14 @@
                 <div class="product-details">
                     <h2 class="product-name">{{ product.name }}</h2>
                     <p class="product-brand"><strong>Brand:</strong> {{ product.brand }}</p>
-                    <p class="product-price"><strong>Price:</strong> ${{ product.price }}</p>
+                    <p class="product-price"><strong>Price:</strong> ₹{{ product.price }}</p>
                     <p class="product-description"><strong>Description:</strong> {{ product.description }}</p>
                     <p class="product-quantity"><strong>Quantity:</strong> {{ product.quantity }}</p>
-                </div>
-    
-                <!-- Reviews Section -->
-                <div class="product-reviews">
-                    <h3>Customer Reviews:</h3>
-                    {% include 'partials/reviews.html' with reviews=product.reviews.all %}
-                </div>
+                    <div class="product-reviews">
+                        <h3>Customer Reviews:</h3>
+                        {% include 'partials/reviews.html' with reviews=product.reviews.all %}
+                    </div>
+                </div>               
             </li>
         {% endfor %}
     </ul>
