@@ -51,4 +51,15 @@ class OrderCreateView(CreateAPIView):
 from django.shortcuts import render
 
 def index(request):
+<<<<<<< Updated upstream
     return render(request, 'mobile_sale/index.html')
+=======
+    # Fetch all products to display on the frontend
+    products = Product.objects.all()
+    return render(request, 'mobile_sale/index.html', {'products': products})
+
+def order_list(request):
+    # Fetch all orders to display on the frontend
+    orders = Order.objects.all()
+    return render(request, 'mobile_sale/order_list.html', {'orders': orders})
+>>>>>>> Stashed changes
