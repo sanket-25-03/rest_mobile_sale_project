@@ -1,27 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Order</title>
-</head>
-<body>
-    <h1>Create a New Order</h1>
+{% extends 'base.html' %}
+
+{% block title %}Create Order{% endblock %}
+
+{% block content %}
+<div class="container">
     <form method="post">
         {% csrf_token %}
+        <h1>Create a New Order</h1>
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br>
+        <input type="text" id="username" name="username" required>
 
         <label for="product">Product ID:</label>
-        <input type="number" id="product" name="product" required><br>
+        <input type="number" id="product" name="product" required>
 
         <label for="quantity">Quantity:</label>
-        <input type="number" id="quantity" name="quantity" required><br>
+        <input type="number" id="quantity" name="quantity" required>
 
         <label for="order_date">Order Date:</label>
-        <input type="datetime-local" id="order_date" name="order_date" required><br>
+        <input type="datetime-local" id="order_date" name="order_date" required>
 
         <button type="submit">Create Order</button>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}
