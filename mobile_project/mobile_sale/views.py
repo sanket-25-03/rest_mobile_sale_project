@@ -1,37 +1,17 @@
 from rest_framework import generics, filters, status
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
-from django_filters import rest_framework as django_filters
 from django.shortcuts import render, redirect
 from .models import Product, Order
 from .serializers import ProductSerializer, OrderSerializer
 
 
 
-class ProductPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = 'page_size'
-    max_page_size = 100
-
-
-class ProductFilter(django_filters.FilterSet):
-    brand = django_filters.CharFilter(lookup_expr='icontains', label='Brand')
-    min_price = django_filters.NumberFilter(field_name='price', lookup_expr='gte', label='Min Price')
-    max_price = django_filters.NumberFilter(field_name='price', lookup_expr='lte', label='Max Price')
-
-    class Meta:
-        model = Product
-        fields = ['brand', 'price']
-
-
 class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    pagination_class = ProductPagination
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
-    filterset_class = ProductFilter
     ordering_fields = ['price', 'name']
     ordering = ['price']
 
