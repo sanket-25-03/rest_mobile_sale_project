@@ -7,10 +7,22 @@ from .models import Product, Order
 from .serializers import ProductSerializer, OrderSerializer
 
 
+from django_filters import rest_framework as filters
+
+class ProductFilter(filters.FilterSet):
+    price_min = filters.NumberFilter(field_name="price", lookup_expr="gte")
+    price_max = filters.NumberFilter(field_name="price", lookup_expr="lte")
+    brand = filters.CharFilter(field_name="brand", lookup_expr="icontains")
+
+    class Meta:
+        model = Product
+        fields = ['price_min', 'price_max', 'brand']
+
 class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filterset_class = ProductFilter
     ordering_fields = ['price', 'name']
     ordering = ['price']
 
@@ -72,3 +84,10 @@ def create_order_view(request):
         Order.objects.create(product=product, quantity=quantity, username=request.user)
         return redirect('order-list')
     return render(request, 'mobile_sale/Order.html')
+
+from django.shortcuts import render
+
+def create_order(request):
+    # Example: Retrieve the selected brand name from a GET parameter or session
+    brand_name = request.GET.get('brand_name', 'Default Brand')
+    return render(request, 'create_order.html', {'brand_name': brand_name})
