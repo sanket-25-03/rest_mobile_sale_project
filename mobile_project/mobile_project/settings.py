@@ -29,10 +29,6 @@ INSTALLED_APPS = [
     'django_filters',
 ]
 
-# Static files settings
-STATIC_URL = '/static/'  # This is the URL where static files will be served
-STATICFILES_DIRS = [BASE_DIR / 'static']  # Adjusted for your directory structure
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # Use this for collecting static files during deployment
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -111,7 +107,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'  # This is the URL where static files will be served
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    r'S:\rest_mobile_sale_project\rest_mobile_sale_project\mobile_project\mobile_sale\static',
+]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
