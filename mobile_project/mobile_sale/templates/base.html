@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Website{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- Loader -->
+    <div id="loader">
+        <div></div>
+    </div>
+
+    <!-- Logo in the Top Right Corner -->
+    <div class="logo-container">
+        <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo">
+    </div>
+
+    <!-- Content Block -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- JavaScript to Remove Loader -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loader = document.getElementById('loader');
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 1000); // Adjust time as needed
+        });
+    </script>
+</body>
+</html>
