@@ -3,69 +3,8 @@
 {% block title %}Add Product{% endblock %}
 
 {% block content %}
-<style>
-    /* Add Product Page Styles */
-    .add-product-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        background-color: #f9f9f9;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
 
-    .add-product-title {
-        text-align: center;
-        color: #3949ab;
-        font-size: 2.5em;
-        margin-bottom: 30px;
-        font-weight: bold;
-        text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        font-size: 1.2em;
-        color: #333;
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 10px;
-        font-size: 1em;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-        box-sizing: border-box;
-    }
-
-    .form-group textarea {
-        resize: vertical;
-    }
-
-    button {
-        background-color: #3949ab;
-        color: #fff;
-        padding: 12px 20px;
-        border-radius: 5px;
-        font-size: 1.2em;
-        cursor: pointer;
-        border: none;
-        transition: background 0.3s, transform 0.2s;
-        width: 100%;
-    }
-
-    button:hover {
-        background-color: #283593;
-        transform: scale(1.05);
-    }
-</style>
-
+   
 <div class="add-product-container">
     <h1 class="add-product-title">Add a New Product</h1>
     <form method="POST" enctype="multipart/form-data">

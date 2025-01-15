@@ -35,6 +35,16 @@ class OrderCreateView(CreateAPIView):
 
 
 def index(request):
+
+    return render(request, 'mobile_sale/index.html')
+    # Fetch all products to display on the frontend
+    products = Product.objects.all()
+    return render(request, 'mobile_sale/index.html', {'products': products})
+
+def order_list(request):
+    # Fetch all orders to display on the frontend
+    orders = Order.objects.all()
+
     products = Product.objects.all()
     return render(request, 'mobile_sale/index.html', {'products': products})
 
@@ -57,5 +67,4 @@ def add_product_view(request):
             prod_image=prod_image
         )
         return redirect('index') 
-
     return render(request, 'mobile_sale/AddProducts.html')
