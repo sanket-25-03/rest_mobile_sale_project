@@ -10,8 +10,15 @@
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required>
 
-        <label for="product">Product ID:</label>
-        <input type="number" id="product" name="product" required>
+        <label for="product">Product:</label>
+        <input 
+            type="text" 
+            id="product" 
+            name="product" 
+            value="{{ brand_name }}" 
+            readonly
+        >
+        <br>
 
         <label for="quantity">Quantity:</label>
         <input type="number" id="quantity" name="quantity" required>
