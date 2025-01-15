@@ -10,14 +10,12 @@ from .serializers import ProductSerializer, OrderSerializer
 
 
 
-# Pagination for Products
 class ProductPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 100
 
 
-# Filtering for Products
 class ProductFilter(django_filters.FilterSet):
     brand = django_filters.CharFilter(lookup_expr='icontains', label='Brand')
     min_price = django_filters.NumberFilter(field_name='price', lookup_expr='gte', label='Min Price')
@@ -28,7 +26,6 @@ class ProductFilter(django_filters.FilterSet):
         fields = ['brand', 'price']
 
 
-# API to List Products with Pagination, Filtering, and Ordering
 class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -39,13 +36,11 @@ class ProductListView(generics.ListAPIView):
     ordering = ['price']
 
 
-# API to Create a New Product
 class ProductCreateView(generics.CreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 
-# API to Place an Order
 class OrderCreateView(CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
@@ -59,14 +54,11 @@ class OrderCreateView(CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Render Index Page with Product List
 def index(request):
-    # Fetch all products to display on the frontend
     products = Product.objects.all()
     return render(request, 'mobile_sale/index.html', {'products': products})
 
 
-# Render Add Product Page
 def add_product_view(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -76,7 +68,6 @@ def add_product_view(request):
         quantity = request.POST.get('quantity')
         prod_image = request.FILES.get('prod_image')
 
-        # Save the product in the database
         Product.objects.create(
             name=name,
             brand=brand,
@@ -85,6 +76,6 @@ def add_product_view(request):
             quantity=quantity,
             prod_image=prod_image
         )
-        return redirect('index')  # Redirect to index page after adding a product
+        return redirect('index') 
 
     return render(request, 'mobile_sale/AddProducts.html')
