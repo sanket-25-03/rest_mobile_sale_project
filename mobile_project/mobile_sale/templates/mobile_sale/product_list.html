@@ -1,50 +1,23 @@
-{% extends 'base.html' %} {% block title %}Product List{% endblock %} {% load
-static %} {% block content %}
+{% extends 'base.html' %}
 
+{% block title %}Product List{% endblock %}
+
+{% block content %}
 <div class="header">
-  <h1>Product List</h1>
-  <a href="{% url 'add-product' %}" class="add-product-link">Add Product</a>
+    <h1>Product List</h1>
+    <a href="{% url 'add-product' %}" class="add-product-link">Add Product</a>
 </div>
 
-{% if products %}
-<ul>
-  {% for product in products %}
-  <li class="product-item">
-    <div class="product-image">
-      {% if product.prod_image %}
-      <img src="{{ product.prod_image.url }}" alt="{{ product.name }}" />
-      {% else %}
-      <p>No image available</p>
-      {% endif %}
-    </div>
-    <div class="product-details">
-      <h2 class="product-name">{{ product.name }}</h2>
-      <p class="product-brand"><strong>Brand:</strong> {{ product.brand }}</p>
-      <p class="product-price"><strong>Price:</strong> ₹{{ product.price }}</p>
-      <p class="product-description">
-        <strong>Description:</strong> {{ product.description }}
-      </p>
-      <p class="product-quantity">
-        <strong>Quantity:</strong> {{ product.quantity }}
-      </p>
-      <div class="product-reviews">
-        <h3>Customer Reviews:</h3>
-        {% include 'partials/reviews.html' with reviews=product.reviews.all %}
-      </div>
-      <a href="{% url 'order-create' %}" class="add-product-link">Order Now</a>
-    </div>
-  </li>
-  {% endfor %}
 <div class="filter-section">
     <form method="GET" action="{% url 'product-list' %}">
         <label for="price_min">Min Price:</label>
-        <input type="number" name="price_min" id="price_min" placeholder="0">
+        <input type="number" name="price_min" id="price_min" placeholder="0" value="{{ request.GET.price_min }}">
         
         <label for="price_max">Max Price:</label>
-        <input type="number" name="price_max" id="price_max" placeholder="10000">
+        <input type="number" name="price_max" id="price_max" placeholder="10000" value="{{ request.GET.price_max }}">
         
         <label for="brand">Brand:</label>
-        <input type="text" name="brand" id="brand" placeholder="Brand Name">
+        <input type="text" name="brand" id="brand" placeholder="Brand Name" value="{{ request.GET.brand }}">
 
         <button type="submit">Filter</button>
     </form>
@@ -78,4 +51,5 @@ static %} {% block content %}
 </ul>
 {% else %}
 <p class="no-data">No products available</p>
-{% endif %} {% endblock %}
+{% endif %}
+{% endblock %}

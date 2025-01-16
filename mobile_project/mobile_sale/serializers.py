@@ -2,12 +2,11 @@ from rest_framework import serializers
 from .models import Order, Product, User, Reviews
 
 class OrderSerializer(serializers.ModelSerializer):
-    username = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
     
     class Meta:
         model = Order
-        fields = ['id', 'username', 'product', 'quantity', 'order_date']
+        fields = ['id', 'product', 'quantity', 'order_date']
 
     def create(self, validated_data):
         order = Order.objects.create(**validated_data)

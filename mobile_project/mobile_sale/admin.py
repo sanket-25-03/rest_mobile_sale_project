@@ -7,9 +7,8 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ['email', 'username']
     
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['username','product','quantity','order_date']
-    list_filter = ['username']
-    search_fields = ['username', 'order_date']
+    list_display = ['product','quantity','order_date']
+    search_fields = ['order_date']
     
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['name','brand','price','description','quantity']

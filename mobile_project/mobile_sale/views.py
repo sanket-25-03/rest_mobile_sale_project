@@ -1,16 +1,16 @@
-from rest_framework import generics, filters, status
+from rest_framework import generics, status
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render, redirect
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Product, Order, Reviews
 from .serializers import ProductSerializer, OrderSerializer
 from django.contrib.auth.models import User
 
-
-
+# Django Filters
 from django_filters import rest_framework as filters
 
+# Product Filter for the list view
 class ProductFilter(filters.FilterSet):
     price_min = filters.NumberFilter(field_name="price", lookup_expr="gte")
     price_max = filters.NumberFilter(field_name="price", lookup_expr="lte")
@@ -20,16 +20,25 @@ class ProductFilter(filters.FilterSet):
         model = Product
         fields = ['price_min', 'price_max', 'brand']
 
+# Product list view with filtering, searching, and ordering
 class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = ProductFilter
+    search_fields = ['name', 'brand']
+    ordering_fields = ['price', 'name']
 
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        return render(request, 'mobile_sale/product_list.html', {'products': response.data})
 
+# Product creation view
 class ProductCreateView(generics.CreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
-
+# Order creation view
 class OrderCreateView(CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
@@ -41,17 +50,17 @@ class OrderCreateView(CreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# Index page with all products
 def index(request):
     products = Product.objects.all()
     return render(request, 'mobile_sale/index.html', {'products': products})
 
-
+# Order list page
 def order_list(request):
     orders = Order.objects.all()
     return render(request, 'mobile_sale/orders.html', {'orders': orders})
 
-
+# Add product view (Function-based)
 def add_product_view(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -69,27 +78,41 @@ def add_product_view(request):
             quantity=quantity,
             prod_image=prod_image
         )
-        return redirect('index') 
+        return redirect('index')  # Redirect to the index page after product creation
+
     return render(request, 'mobile_sale/AddProducts.html')
 
+# Order creation view (Function-based)
 def create_order_view(request):
     if request.method == 'POST':
         product_id = request.POST.get('product')
         quantity = request.POST.get('quantity')
-        product = Product.objects.get(id=product_id)
-        Order.objects.create(product=product, quantity=quantity, username=request.user)
-        return redirect('order-list')
-    return render(request, 'mobile_sale/Order.html')
+        order_date = request.POST.get('order_date')
 
-from django.shortcuts import render
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return render(request, 'mobile_sale/Order.html', {'error': 'Invalid product selected.'})
 
+        Order.objects.create(
+            product=product,
+            quantity=quantity,
+            order_date=order_date
+        )
+
+    products = Product.objects.all()
+    context = {
+        'products': products,
+    }
+    return render(request, 'mobile_sale/Order.html', context)
+
+# Create order view (simplified version)
 def create_order(request):
     brand_name = request.GET.get('brand_name', 'Default Brand')
     return render(request, 'create_order.html', {'brand_name': brand_name})
 
-# view for the Review list
+# Review list view
 def review_list(request):
-    # Fetch all reviews from the database
     reviews = Reviews.objects.all()
     overall_average_rating = 4.5  # Replace with actual calculation if needed
 
@@ -100,6 +123,7 @@ def review_list(request):
     }
     return render(request, 'reviews.html', context)
 
+# Submit review view
 def submit_review(request):
     if request.method == 'POST':
         review_text = request.POST.get('review_text')
