@@ -9,12 +9,8 @@ class User(models.Model):
         return self.username
 
 class Reviews(models.Model):
-    username = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='reviews_by_username')
-    email = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='reviews_by_email')
     reviews = models.CharField(max_length=200)
-    
-    def __str__(self):
-        return f"Review by {self.username}"
+
 
 class Product(models.Model):
     name = models.CharField(max_length=100)

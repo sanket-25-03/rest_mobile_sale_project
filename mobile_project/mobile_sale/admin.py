@@ -17,9 +17,7 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ['name', 'brand','price']
     
 class ReviewsAdmin(admin.ModelAdmin):
-    list_display = ['username','email','reviews']
-    list_filter = ['email']
-    search_fields = ['email']
+    list_display = ['reviews']
 
 admin.site.register(User,UserAdmin)
 admin.site.register(Order,OrderAdmin)

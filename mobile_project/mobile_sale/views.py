@@ -102,13 +102,10 @@ def review_list(request):
 
 def submit_review(request):
     if request.method == 'POST':
-        user = request.user if request.user.is_authenticated else None
         review_text = request.POST.get('review_text')
 
         # Create and save the review
         review = Reviews(
-            username=user,  # Can be None for anonymous users
-            email=user if user else None,  # Optional: email is derived from the user if logged in
             reviews=review_text
         )
         review.save()
