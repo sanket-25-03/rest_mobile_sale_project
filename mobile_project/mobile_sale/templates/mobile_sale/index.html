@@ -29,7 +29,10 @@ static %} {% block content %}
       </p>
       <div class="product-reviews">
         <h3>Customer Reviews:</h3>
-        {% include 'partials/reviews.html' with reviews=product.reviews.all %}
+        <p>No reviews yet. Be the first to leave a review!</p>
+        <a href="{% url 'submit_review' %}">
+          <button type="button" class="btn btn-primary">Add Review</button>
+        </a>
       </div>
       <a href="{% url 'order-create' %}" class="add-product-link">Order Now</a>
     </div>

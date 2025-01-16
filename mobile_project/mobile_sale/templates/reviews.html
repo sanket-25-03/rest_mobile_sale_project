@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Review Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+
+      header {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 0;
+        text-align: center;
+      }
+
+      h1,
+      h2 {
+        margin: 0;
+      }
+
+      .stars {
+        color: gold;
+      }
+
+      .review-form {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: 20px auto;
+      }
+
+      .review-form h2 {
+        margin-bottom: 20px;
+        font-size: 24px;
+      }
+
+      label {
+        font-size: 16px;
+        font-weight: bold;
+        margin: 10px 0 5px;
+        display: block;
+      }
+
+      select,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+      }
+
+      textarea {
+        resize: vertical;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      .review-list {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+      }
+
+      .review-item {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+      }
+
+      .review-item:last-child {
+        border-bottom: none;
+      }
+
+      .review-item p {
+        margin: 5px 0;
+      }
+
+      .review-item .rating {
+        color: gold;
+      }
+
+      .no-reviews {
+        text-align: center;
+        font-size: 18px;
+        color: #777;
+      }
+
+      .overall-rating {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Product Reviews</h1>
+    </header>
+
+    <div class="review-list">
+      {% if reviews %}
+      <div class="overall-rating">
+        <h1>Overall Rating: {{ overall_average_rating }} / 5</h1>
+      </div>
+      <ul>
+        {% for review in reviews %}
+        <li class="review-item">
+          <p><strong>Rating Breakdown:</strong></p>
+          <ul>
+            <li>
+              <strong>Price:</strong>
+              <span class="rating"
+                >{{ "★"|slice:":review.price_rating" }}{{
+                "☆"|slice:":5-review.price_rating" }}</span
+              >
+            </li>
+            <li>
+              <strong>Product Quality:</strong>
+              <span class="rating"
+                >{{ "★"|slice:":review.quality_rating" }}{{
+                "☆"|slice:":5-review.quality_rating" }}</span
+              >
+            </li>
+            <li>
+              <strong>Durability:</strong>
+              <span class="rating"
+                >{{ "★"|slice:":review.durability_rating" }}{{
+                "☆"|slice:":5-review.durability_rating" }}</span
+              >
+            </li>
+          </ul>
+          <p><strong>Descriptive Review:</strong> {{ review.review_text }}</p>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="no-reviews">No reviews yet. Be the first to leave a review!</p>
+      {% endif %}
+    </div>
+
+    <div class="review-form">
+      <h2>Leave a Review</h2>
+      <form method="POST" action="/submit_review">
+        {% csrf_token %}
+        <label for="price-rating">Price Rating:</label>
+        <select id="price-rating" name="price_rating">
+          {% for i in range %}
+          <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}</select
+        ><br />
+
+        <label for="quality-rating">Product Quality Rating:</label>
+        <select id="quality-rating" name="quality_rating">
+          {% for i in range %}
+          <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}</select
+        ><br />
+
+        <label for="durability-rating">Durability Rating:</label>
+        <select id="durability-rating" name="durability_rating">
+          {% for i in range %}
+          <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}</select
+        ><br />
+
+        <label for="review-text">Descriptive Review:</label><br />
+        <textarea
+          id="review-text"
+          name="review_text"
+          rows="5"
+          required></textarea
+        ><br />
+
+        <button type="submit">Submit Review</button>
+      </form>
+    </div>
+  </body>
+</html>
