@@ -3,8 +3,10 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render, redirect
-from .models import Product, Order
+from .models import Product, Order, Reviews
 from .serializers import ProductSerializer, OrderSerializer
+from django.contrib.auth.models import User
+
 
 
 from django_filters import rest_framework as filters
@@ -84,3 +86,32 @@ from django.shortcuts import render
 def create_order(request):
     brand_name = request.GET.get('brand_name', 'Default Brand')
     return render(request, 'create_order.html', {'brand_name': brand_name})
+
+# view for the Review list
+def review_list(request):
+    # Fetch all reviews from the database
+    reviews = Reviews.objects.all()
+    overall_average_rating = 4.5  # Replace with actual calculation if needed
+
+    context = {
+        'reviews': reviews,
+        'overall_average_rating': overall_average_rating,
+        'range': range(1, 6),  # Used for dropdowns
+    }
+    return render(request, 'reviews.html', context)
+
+def submit_review(request):
+    if request.method == 'POST':
+        user = request.user if request.user.is_authenticated else None
+        review_text = request.POST.get('review_text')
+
+        # Create and save the review
+        review = Reviews(
+            username=user,  # Can be None for anonymous users
+            email=user if user else None,  # Optional: email is derived from the user if logged in
+            reviews=review_text
+        )
+        review.save()
+        return redirect('review_list')  # Redirect to the review list after submission
+
+    return render(request, 'reviews.html')

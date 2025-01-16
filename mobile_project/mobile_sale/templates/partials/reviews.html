@@ -1,12 +1,93 @@
-{% if reviews %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Review Page</title>
+    <style>
+      .stars {
+        color: gold;
+      }
+      .review-form {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    {% if reviews %}
+    <h1>Overall Rating: {{ overall_average_rating }} / 5</h1>
     <ul>
-        {% for review in reviews %}
-            <li>
-                <p><strong>Rating:</strong> {{ review.rating }} / 5</p>
-                <p>{{ review.review_text }}</p>
-            </li>
-        {% endfor %}
+      {% for review in reviews %}
+      <li>
+        <p><strong>Rating Breakdown:</strong></p>
+        <ul>
+          <li>
+            <strong>Price:</strong>
+            <span class="stars"
+              >{{ "★"|slice:":review.price_rating" }}{{
+              "☆"|slice:":5-review.price_rating" }}</span
+            >
+          </li>
+          <li>
+            <strong>Product Quality:</strong>
+            <span class="stars"
+              >{{ "★"|slice:":review.quality_rating" }}{{
+              "☆"|slice:":5-review.quality_rating" }}</span
+            >
+          </li>
+          <li>
+            <strong>Durability:</strong>
+            <span class="stars"
+              >{{ "★"|slice:":review.durability_rating" }}{{
+              "☆"|slice:":5-review.durability_rating" }}</span
+            >
+          </li>
+        </ul>
+        <p><strong>Descriptive Review:</strong> {{ review.review_text }}</p>
+      </li>
+      {% endfor %}
     </ul>
-{% else %}
-    <p>No reviews yet</p>
-{% endif %}
+    {% else %}
+    <h2>Overall Rating: No reviews yet</h2>
+    <p>No reviews have been added yet. Be the first to leave a review!</p>
+    {% endif %}
+
+    <div class="review-form">
+      <h2>Leave a Review</h2>
+      <form method="POST" action="/submit_review">
+        {% csrf_token %}
+        <label for="price-rating">Price Rating:</label>
+        <select id="price-rating" name="price_rating">
+          {% for i in range %}
+          <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}</select
+        ><br />
+
+        <label for="quality-rating">Product Quality Rating:</label>
+        <select id="quality-rating" name="quality_rating">
+          {% for i in range %}
+          <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}</select
+        ><br />
+
+        <label for="durability-rating">Durability Rating:</label>
+        <select id="durability-rating" name="durability_rating">
+          {% for i in range %}
+          <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}</select
+        ><br />
+
+        <label for="review-text">Descriptive Review:</label><br />
+        <textarea
+          id="review-text"
+          name="review_text"
+          rows="5"
+          cols="40"
+          required></textarea
+        ><br />
+
+        <button type="submit">Submit Review</button>
+      </form>
+    </div>
+  </body>
+</html>
