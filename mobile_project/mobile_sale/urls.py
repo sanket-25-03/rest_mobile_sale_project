@@ -13,6 +13,9 @@ urlpatterns = [
     
     path('create-order/', create_order_view, name='order-product'),
     path('order/create/', OrderCreateView.as_view(), name='order-create'),  
+
+    path('products/', ProductListView.as_view(), name='product-list'),
+
 ]
 
 if settings.DEBUG:

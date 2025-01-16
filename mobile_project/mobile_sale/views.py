@@ -5,22 +5,36 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render, redirect
 from .models import Product, Order
 from .serializers import ProductSerializer, OrderSerializer
-
-
-from django_filters import rest_framework as filters
-
-class ProductFilter(filters.FilterSet):
-    price_min = filters.NumberFilter(field_name="price", lookup_expr="gte")
-    price_max = filters.NumberFilter(field_name="price", lookup_expr="lte")
-    brand = filters.CharFilter(field_name="brand", lookup_expr="icontains")
-
-    class Meta:
-        model = Product
-        fields = ['price_min', 'price_max', 'brand']
+from rest_framework import generics
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+from .models import Product
+from .serializers import ProductSerializer
+from .filters import ProductFilter  # Assuming you created ProductFilter in a separate file
+from django.shortcuts import render
+from rest_framework import generics
+from .models import Product
+from .serializers import ProductSerializer
+from .filters import ProductFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = ProductFilter
+
+    # Optional: Searchable fields and ordering fields
+    search_fields = ['name', 'brand']
+    ordering_fields = ['price', 'name']
+
+    def get(self, request, *args, **kwargs):
+        # Get filtered products
+        response = super().get(request, *args, **kwargs)
+        # Return an HTML template with filtered data
+        return render(request, 'product_list.html', {'products': response.data})
+
 
 
 class ProductCreateView(generics.CreateAPIView):

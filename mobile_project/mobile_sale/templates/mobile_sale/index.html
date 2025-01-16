@@ -2,12 +2,27 @@
 
 {% block title %}Product List{% endblock %}
 
+
 {% block content %}
 <div class="header">
     <h1>Product List</h1>
     <a href="{% url 'add-product' %}" class="add-product-link">Add Product</a>
 </div>
 
+<div class="filter-section">
+    <form method="GET" action="{% url 'product-list' %}">
+        <label for="price_min">Min Price:</label>
+        <input type="number" name="price_min" id="price_min" placeholder="0">
+        
+        <label for="price_max">Max Price:</label>
+        <input type="number" name="price_max" id="price_max" placeholder="10000">
+        
+        <label for="brand">Brand:</label>
+        <input type="text" name="brand" id="brand" placeholder="Brand Name">
+
+        <button type="submit">Filter</button>
+    </form>
+</div>
 
 {% if products %}
 <ul>
