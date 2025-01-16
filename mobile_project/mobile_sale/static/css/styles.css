@@ -251,3 +251,24 @@ button:hover {
     margin: 2px;
     padding: 5px 15px;
 }
+.btn.btn-primary {
+    font-size: 12px; /* Reduce font size */
+    padding: 6px 12px; /* Reduce padding */
+    border-radius: 4px; /* Slightly smaller border radius */
+    background-color: #9e9e9d; /* Primary color */
+    color: white; /* White text */
+    border: 1px solid #007bff; /* Border color matching the background */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  
+    /* Shorten the length of the button */
+    width: auto; /* Make the width fit the content */
+    min-width: 100px; /* Set a minimum width to ensure button is not too small */
+    max-width: 150px; /* Set a maximum width to limit the button's length */
+  }
+  .product-reviews {
+    display: flex;
+    justify-content: center; /* Horizontally center the button */
+    align-items: center; /* Vertically center the button */
+    text-align: left; /* Ensure the text is also centered */
+  }
