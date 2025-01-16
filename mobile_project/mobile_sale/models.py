@@ -29,10 +29,6 @@ class Product(models.Model):
         return self.name
     
 class Order(models.Model):
-    username = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     order_date = models.DateTimeField()
-    
-    def __str__(self):
-        return f"Order of {self.product.name} by {self.username}"
