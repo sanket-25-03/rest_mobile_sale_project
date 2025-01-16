@@ -73,7 +73,7 @@ def add_product_view(request):
     return render(request, 'mobile_sale/AddProducts.html')
 
 from django.shortcuts import render, redirect
-from django.utils.timezone import now
+from django.contrib.auth.models import User
 from .models import Product, Order
 
 def create_order_view(request):
@@ -81,22 +81,25 @@ def create_order_view(request):
         product_id = request.POST.get('product')
         quantity = request.POST.get('quantity')
         order_date = request.POST.get('order_date')
-        username = request.POST.get('username')  # Added to handle the username field
 
-        product = Product.objects.get(id=product_id)
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return render(request, 'mobile_sale/Order.html', {'error': 'Invalid product selected.'})
+
         Order.objects.create(
             product=product,
             quantity=quantity,
-            username=username,
             order_date=order_date
         )
         return redirect('order-list')
 
-    # Pass context for rendering the form
+    products = Product.objects.all()
     context = {
-        'brand_name': 'Sample Product Name',  # Replace with dynamic data if needed
+        'products': products,
     }
     return render(request, 'mobile_sale/Order.html', context)
+
 
 
 from django.shortcuts import render
