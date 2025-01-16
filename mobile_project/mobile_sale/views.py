@@ -23,10 +23,6 @@ class ProductFilter(filters.FilterSet):
 class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
-    filterset_class = ProductFilter
-    ordering_fields = ['price', 'name']
-    ordering = ['price']
 
 
 class ProductCreateView(generics.CreateAPIView):
@@ -47,13 +43,11 @@ class OrderCreateView(CreateAPIView):
 
 
 def index(request):
-    # Fetch all products to display on the frontend
     products = Product.objects.all()
     return render(request, 'mobile_sale/index.html', {'products': products})
 
 
 def order_list(request):
-    # Fetch all orders to display on the frontend
     orders = Order.objects.all()
     return render(request, 'mobile_sale/orders.html', {'orders': orders})
 
@@ -90,7 +84,6 @@ def create_order_view(request):
 from django.shortcuts import render
 
 def create_order(request):
-    # Example: Retrieve the selected brand name from a GET parameter or session
     brand_name = request.GET.get('brand_name', 'Default Brand')
     return render(request, 'create_order.html', {'brand_name': brand_name})
 
@@ -109,16 +102,15 @@ def review_list(request):
 
 def submit_review(request):
     if request.method == 'POST':
-        user = request.user if request.user.is_authenticated else None
         review_text = request.POST.get('review_text')
 
         # Create and save the review
         review = Reviews(
-            username=user,  # Can be None for anonymous users
-            email=user if user else None,  # Optional: email is derived from the user if logged in
             reviews=review_text
         )
         review.save()
-        return redirect('review_list')  # Redirect to the review list after submission
+        return redirect('reviews.html')  # Redirect to the review list after submission
 
     return render(request, 'reviews.html')
+
+
