@@ -19,30 +19,6 @@
     <ul>
       {% for review in reviews %}
       <li>
-        <p><strong>Rating Breakdown:</strong></p>
-        <ul>
-          <li>
-            <strong>Price:</strong>
-            <span class="stars"
-              >{{ "★"|slice:":review.price_rating" }}{{
-              "☆"|slice:":5-review.price_rating" }}</span
-            >
-          </li>
-          <li>
-            <strong>Product Quality:</strong>
-            <span class="stars"
-              >{{ "★"|slice:":review.quality_rating" }}{{
-              "☆"|slice:":5-review.quality_rating" }}</span
-            >
-          </li>
-          <li>
-            <strong>Durability:</strong>
-            <span class="stars"
-              >{{ "★"|slice:":review.durability_rating" }}{{
-              "☆"|slice:":5-review.durability_rating" }}</span
-            >
-          </li>
-        </ul>
         <p><strong>Descriptive Review:</strong> {{ review.review_text }}</p>
       </li>
       {% endfor %}
@@ -56,27 +32,6 @@
       <h2>Leave a Review</h2>
       <form method="POST" action="/submit_review">
         {% csrf_token %}
-        <label for="price-rating">Price Rating:</label>
-        <select id="price-rating" name="price_rating">
-          {% for i in range %}
-          <option value="{{ i }}">{{ i }}</option>
-          {% endfor %}</select
-        ><br />
-
-        <label for="quality-rating">Product Quality Rating:</label>
-        <select id="quality-rating" name="quality_rating">
-          {% for i in range %}
-          <option value="{{ i }}">{{ i }}</option>
-          {% endfor %}</select
-        ><br />
-
-        <label for="durability-rating">Durability Rating:</label>
-        <select id="durability-rating" name="durability_rating">
-          {% for i in range %}
-          <option value="{{ i }}">{{ i }}</option>
-          {% endfor %}</select
-        ><br />
-
         <label for="review-text">Descriptive Review:</label><br />
         <textarea
           id="review-text"
