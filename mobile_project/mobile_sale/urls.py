@@ -10,7 +10,10 @@ urlpatterns = [
     
     path('products/create/', ProductCreateView.as_view(), name='product-create'),
     path('add-product/', add_product_view, name='add-product'),
-    
+    path('products/add/', add_product_view, name='add_product'),  # For adding a product
+    path('products/edit/<int:product_id>/', add_product_view, name='edit_product'), 
+
+
     path('create-order/', create_order_view, name='order-product'),
     path('order/create/', OrderCreateView.as_view(), name='order-create'),  
 

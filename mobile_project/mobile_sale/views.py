@@ -51,7 +51,19 @@ def order_list(request):
     return render(request, 'mobile_sale/orders.html', {'orders': orders})
 
 
-def add_product_view(request):
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from .models import Product
+import json
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Product
+
+def add_product_view(request, product_id=None):
+    product = None
+    if product_id:
+        product = get_object_or_404(Product, id=product_id)
+
     if request.method == 'POST':
         name = request.POST.get('name')
         brand = request.POST.get('brand')
@@ -60,16 +72,29 @@ def add_product_view(request):
         quantity = request.POST.get('quantity')
         prod_image = request.FILES.get('prod_image')
 
-        Product.objects.create(
-            name=name,
-            brand=brand,
-            price=price,
-            description=description,
-            quantity=quantity,
-            prod_image=prod_image
-        )
-        return redirect('index') 
-    return render(request, 'mobile_sale/AddProducts.html')
+        if product:
+            # Update existing product
+            product.name = name
+            product.brand = brand
+            product.price = price
+            product.description = description
+            product.quantity = quantity
+            if prod_image:
+                product.prod_image = prod_image
+            product.save()
+        else:
+            # Create a new product
+            Product.objects.create(
+                name=name,
+                brand=brand,
+                price=price,
+                description=description,
+                quantity=quantity,
+                prod_image=prod_image
+            )
+        return redirect('index')
+
+    return render(request, 'mobile_sale/AddProducts.html', {'product': product})
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
