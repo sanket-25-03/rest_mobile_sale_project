@@ -11,13 +11,13 @@
 <div class="filter-section">
     <form method="GET" action="{% url 'product-list' %}">
         <label for="price_min">Min Price:</label>
-        <input type="number" name="price_min" id="price_min" placeholder="0">
+        <input type="number" name="price_min" id="price_min" placeholder="0" value="{{ request.GET.price_min }}">
         
         <label for="price_max">Max Price:</label>
-        <input type="number" name="price_max" id="price_max" placeholder="10000">
+        <input type="number" name="price_max" id="price_max" placeholder="10000" value="{{ request.GET.price_max }}">
         
         <label for="brand">Brand:</label>
-        <input type="text" name="brand" id="brand" placeholder="Brand Name">
+        <input type="text" name="brand" id="brand" placeholder="Brand Name" value="{{ request.GET.brand }}">
 
         <button type="submit">Filter</button>
     </form>
