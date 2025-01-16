@@ -1,4 +1,4 @@
-from rest_framework import generics, filters, status
+from rest_framework import generics, status
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
