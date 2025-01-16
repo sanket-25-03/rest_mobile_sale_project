@@ -41,13 +41,11 @@ class OrderCreateView(CreateAPIView):
 
 
 def index(request):
-    # Fetch all products to display on the frontend
     products = Product.objects.all()
     return render(request, 'mobile_sale/index.html', {'products': products})
 
 
 def order_list(request):
-    # Fetch all orders to display on the frontend
     orders = Order.objects.all()
     return render(request, 'mobile_sale/orders.html', {'orders': orders})
 
@@ -92,7 +90,6 @@ def create_order_view(request):
             quantity=quantity,
             order_date=order_date
         )
-        return redirect('order-list')
 
     products = Product.objects.all()
     context = {
@@ -105,6 +102,5 @@ def create_order_view(request):
 from django.shortcuts import render
 
 def create_order(request):
-    # Example: Retrieve the selected brand name from a GET parameter or session
     brand_name = request.GET.get('brand_name', 'Default Brand')
     return render(request, 'create_order.html', {'brand_name': brand_name})
