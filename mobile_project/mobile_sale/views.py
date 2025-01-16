@@ -133,6 +133,6 @@ def submit_review(request):
             reviews=review_text
         )
         review.save()
-        return redirect('review_list')  # Redirect to the review list after submission
+        return redirect('reviews.html')  # Redirect to the review list after submission
 
     return render(request, 'reviews.html')
