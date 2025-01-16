@@ -21,10 +21,6 @@ class ProductFilter(filters.FilterSet):
 class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
-    filterset_class = ProductFilter
-    ordering_fields = ['price', 'name']
-    ordering = ['price']
 
 
 class ProductCreateView(generics.CreateAPIView):
@@ -76,14 +72,32 @@ def add_product_view(request):
         return redirect('index') 
     return render(request, 'mobile_sale/AddProducts.html')
 
+from django.shortcuts import render, redirect
+from django.utils.timezone import now
+from .models import Product, Order
+
 def create_order_view(request):
     if request.method == 'POST':
         product_id = request.POST.get('product')
         quantity = request.POST.get('quantity')
+        order_date = request.POST.get('order_date')
+        username = request.POST.get('username')  # Added to handle the username field
+
         product = Product.objects.get(id=product_id)
-        Order.objects.create(product=product, quantity=quantity, username=request.user)
+        Order.objects.create(
+            product=product,
+            quantity=quantity,
+            username=username,
+            order_date=order_date
+        )
         return redirect('order-list')
-    return render(request, 'mobile_sale/Order.html')
+
+    # Pass context for rendering the form
+    context = {
+        'brand_name': 'Sample Product Name',  # Replace with dynamic data if needed
+    }
+    return render(request, 'mobile_sale/Order.html', context)
+
 
 from django.shortcuts import render
 
