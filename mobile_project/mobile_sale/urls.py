@@ -3,26 +3,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from . import views
 
-from .views import ProductListView, ProductCreateView, OrderCreateView, index, add_product_view, order_list, create_order_view
-
 urlpatterns = [
-    path('', index, name='index'), 
-    
-    path('products/create/', ProductCreateView.as_view(), name='product-create'),
-    path('add-product/', add_product_view, name='add-product'),
-    path('products/add/', add_product_view, name='add_product'),  # For adding a product
-    path('products/edit/<int:product_id>/', add_product_view, name='edit_product'), 
-
-
-    path('create-order/', create_order_view, name='order-product'),
-    path('order/create/', OrderCreateView.as_view(), name='order-create'),  
-
-    path('products/', ProductListView.as_view(), name='product-list'),
-
+    path('mobile/', views.index, name='index'), 
+    path('mobile/products/create/', views.ProductCreateView.as_view(), name='product-create'),
+    path('mobile/products/update/<int:product_id>/', views.ProductUpdateView.as_view(), name='product-update'),  # Update product endpoint    
+    path('mobile/products/filter/', views.ProductListView.as_view(), name='product-list'),  
+    path('mobile/products/delete/<int:product_id>/', views.ProductDeleteView.as_view(), name='product-delete'),
+    path('mobile/order/', views.OrderCreateView.as_view(), name='order-create'),
+    path('mobile/review/', views.ReviewCreateView.as_view(), name='review-create'),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-
-    
