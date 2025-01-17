@@ -17,10 +17,10 @@ urlpatterns = [
     path('orders/create/', OrderCreateView.as_view(), name='order-create'),  # Order creation view
     path('create-order/', views.create_order, name='create_order'),
     path('', views.review_list, name='review_list'),  
-    path('submit_review/', views.submit_review, name='submit_review'),
+    # path('submit_review/', views.submit_review, name='submit_review'),
 
     path('submit_review', views.submit_review, name='submit_review'),  # Submit review view
-    path('review_list', views.review_list, name='review_list'),  # Review list view
+    # path('review_list', views.review_list, name='review_list'),  # Review list view
 ]
 
 if settings.DEBUG:

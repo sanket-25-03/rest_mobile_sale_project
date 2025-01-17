@@ -1,28 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Review Page</title>
     <style>
-        .stars {
-            color: gold;
-        }
-        .review-form {
-            margin-top: 20px;
-        }
+      .stars {
+        color: gold;
+      }
+      .review-form {
+        margin-top: 20px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     {% if reviews %}
     <h1>Overall Rating: {{ overall_average_rating }} / 5</h1>
     <ul>
-        {% for review in reviews %}
-        <li>
-            <p><strong>Descriptive Review:</strong> {{ review.review_text }}</p>
-            <p><strong>Rating:</strong> {{ review.rating }} / 5</p>
-        </li>
-        {% endfor %}
+      {% for review in reviews %}
+      <li>
+        <p><strong>Descriptive Review:</strong> {{ review.review_text }}</p>
+        <p><strong>Rating:</strong> {{ review.rating }} / 5</p>
+      </li>
+      {% endfor %}
     </ul>
     {% else %}
     <h2>No reviews yet</h2>
@@ -30,30 +30,30 @@
     {% endif %}
 
     <div class="review-form">
-        <h2>Leave a Review</h2>
-        <form method="POST" action="/submit_review">
-            {% csrf_token %}
+      <h2>Leave a Review</h2>
+      <form method="POST" action="/submit_review">
+        {% csrf_token %}
 
-            <label for="review-text">Descriptive Review:</label><br />
-            <textarea
-                id="review-text"
-                name="review_text"
-                rows="5"
-                cols="40"
-                required
-            ></textarea><br />
+        <label for="review-text">Descriptive Review:</label><br />
+        <textarea
+          id="review-text"
+          name="review_text"
+          rows="5"
+          cols="40"
+          required></textarea
+        ><br />
 
-            <label for="rating">Rating:</label><br />
-            <select name="rating" id="rating" required>
-                <option value="1">1 Star</option>
-                <option value="2">2 Stars</option>
-                <option value="3">3 Stars</option>
-                <option value="4">4 Stars</option>
-                <option value="5">5 Stars</option>
-            </select><br />
+        <label for="rating">Rating:</label><br />
+        <select name="rating" id="rating" required>
+          <option value="1">1 Star</option>
+          <option value="2">2 Stars</option>
+          <option value="3">3 Stars</option>
+          <option value="4">4 Stars</option>
+          <option value="5">5 Stars</option></select
+        ><br />
 
-            <button type="submit">Submit Review</button>
-        </form>
+        <button type="submit">Submit Review</button>
+      </form>
     </div>
-</body>
+  </body>
 </html>
