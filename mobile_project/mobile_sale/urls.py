@@ -3,24 +3,20 @@ from django.conf import settings
 from django.conf.urls.static import static
 from . import views
 
-from .views import ProductListView, ProductCreateView, OrderCreateView, index, add_product_view, order_list, create_order_view
-
 urlpatterns = [
-    path('', index, name='index'), 
+    path('mobile/', views.index, name='index'), 
+    path('mobile/products/create/', views.ProductCreateView.as_view(), name='product-create'),
+    path('mobile/products/update/<int:product_id>/', views.ProductUpdateView.as_view(), name='product-update'),
+    path('mobile/products/filter/', views.ProductListView.as_view(), name='product-list'),  
+    path('mobile/products/delete/<int:product_id>/', views.ProductDeleteView.as_view(), name='product-delete'),
+    path('mobile/order/', views.OrderCreateView.as_view(), name='order-create'),
+    path('mobile/review/', views.ReviewCreateView.as_view(), name='review-create'),
     
-    path('products/', ProductListView.as_view(), name='product-list'),  # Product list view
-    path('products/create/', ProductCreateView.as_view(), name='product-create'),  # Product creation view
-    path('add-product/', add_product_view, name='add-product'),  # Add product view
     
-    path('create-order/', create_order_view, name='order-product'),  # Create order view
-    path('orders/', order_list, name='order-list'),  # Order list view
-    path('orders/create/', OrderCreateView.as_view(), name='order-create'),  # Order creation view
-    path('create-order/', views.create_order, name='create_order'),
-    path('', views.review_list, name='review_list'),  
-    # path('submit_review/', views.submit_review, name='submit_review'),
-
-    path('submit_review', views.submit_review, name='submit_review'),  # Submit review view
-    # path('review_list', views.review_list, name='review_list'),  # Review list view
+    path('mobile/products/', views.product_list_view, name='product-list'),
+    path('mobile/products/<int:product_id>/', views.product_detail_view, name='product-detail'),
+    path('mobile/orders/', views.order_list_view, name='order-list'),
+    path('mobile/reviews/', views.review_list_view, name='review-list'),
 ]
 
 if settings.DEBUG:
