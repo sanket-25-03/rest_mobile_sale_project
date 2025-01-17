@@ -54,6 +54,10 @@ def order_list(request):
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Product
 
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Product
+from django.views.decorators.csrf import csrf_exempt
+
 def add_product_view(request, product_id=None):
     product = None
     if product_id:

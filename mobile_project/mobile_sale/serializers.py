@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Order, Product, User, Reviews
+from .models import Order, Product, Reviews
 
 class OrderSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
@@ -15,7 +15,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class ReviewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reviews
-        fields = ['username', 'email', 'reviews']
+        fields = ['reviews']
 
 class ProductSerializer(serializers.ModelSerializer):
     reviews = ReviewsSerializer(many=True, read_only=True)
