@@ -8,21 +8,20 @@ from .views import ProductListView, ProductCreateView, OrderCreateView, index, a
 urlpatterns = [
     path('', index, name='index'), 
     
-    path('products/create/', ProductCreateView.as_view(), name='product-create'),
-    path('add-product/', add_product_view, name='add-product'),
-    path('products/add/', add_product_view, name='add_product'),  # For adding a product
-    path('products/edit/<int:product_id>/', add_product_view, name='edit_product'), 
+    path('products/', ProductListView.as_view(), name='product-list'),  # Product list view
+    path('products/create/', ProductCreateView.as_view(), name='product-create'),  # Product creation view
+    path('add-product/', add_product_view, name='add-product'),  # Add product view
+    
+    path('create-order/', create_order_view, name='order-product'),  # Create order view
+    path('orders/', order_list, name='order-list'),  # Order list view
+    path('orders/create/', OrderCreateView.as_view(), name='order-create'),  # Order creation view
+    path('create-order/', views.create_order, name='create_order'),
+    path('', views.review_list, name='review_list'),  
+    # path('submit_review/', views.submit_review, name='submit_review'),
 
-
-    path('create-order/', create_order_view, name='order-product'),
-    path('order/create/', OrderCreateView.as_view(), name='order-create'),  
-
-    path('products/', ProductListView.as_view(), name='product-list'),
-
+    path('submit_review', views.submit_review, name='submit_review'),  # Submit review view
+    # path('review_list', views.review_list, name='review_list'),  # Review list view
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-
-    

@@ -52,14 +52,7 @@ def order_list(request):
     return render(request, 'mobile_sale/orders.html', {'orders': orders})
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Product
-
-def add_product_view(request, product_id=None):
-    product = None
-    if product_id:
-        product = get_object_or_404(Product, id=product_id)
-
+def add_product_view(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         brand = request.POST.get('brand')
@@ -68,29 +61,16 @@ def add_product_view(request, product_id=None):
         quantity = request.POST.get('quantity')
         prod_image = request.FILES.get('prod_image')
 
-        if product:
-            # Update existing product
-            product.name = name
-            product.brand = brand
-            product.price = price
-            product.description = description
-            product.quantity = quantity
-            if prod_image:
-                product.prod_image = prod_image
-            product.save()
-        else:
-            # Create a new product
-            Product.objects.create(
-                name=name,
-                brand=brand,
-                price=price,
-                description=description,
-                quantity=quantity,
-                prod_image=prod_image
-            )
-        return redirect('index')
-
-    return render(request, 'mobile_sale/AddProducts.html', {'product': product})
+        Product.objects.create(
+            name=name,
+            brand=brand,
+            price=price,
+            description=description,
+            quantity=quantity,
+            prod_image=prod_image
+        )
+        return redirect('index') 
+    return render(request, 'mobile_sale/AddProducts.html')
 
 def create_order_view(request):
     if request.method == 'POST':
@@ -107,45 +87,99 @@ def create_order(request):
     brand_name = request.GET.get('brand_name', 'Default Brand')
     return render(request, 'create_order.html', {'brand_name': brand_name})
 
+
 # view for the Review list
+
 def review_list(request):
+
     # Fetch all reviews from the database
+
     reviews = Reviews.objects.all()
+
     overall_average_rating = 4.5  # Replace with actual calculation if needed
 
+
+
     context = {
+
         'reviews': reviews,
+
         'overall_average_rating': overall_average_rating,
+
         'range': range(1, 6),  # Used for dropdowns
+
     }
+
     return render(request, 'reviews.html', context)
 
-def submit_review(request):
-    if request.method == 'POST':
-        review_text = request.POST.get('review_text')
-        
+
 
 def submit_review(request):
+
+    if request.method == 'POST':
+
+        review_text = request.POST.get('review_text')
+
+        
+
+
+
+def submit_review(request):
+
     if request.method == "POST":
+
         # Process the form or data
+
         return HttpResponse("Review submitted successfully!")
+
     else:
+
         return HttpResponse("Invalid request method", status=405)
 
 
+
+
+
 # View to create and save a review
+
 def create_review(request):
+
     if request.method == 'POST':
+
         review_text = request.POST.get('review_text')  # Retrieve the review text from the form
 
+
+
         if review_text:  # Ensure the review text is not empty
+
             # Create and save the review
+
             review = Reviews(reviews=review_text)
+
             review.save()
+
             return redirect('review_list')  # Redirect to the review list after saving
+
         else:
+
             # Handle empty review text case
+
             return HttpResponse("Review text cannot be empty.", status=400)
 
+
+
     # Render a form for creating a new review if the request method is GET
+
     return render(request, 'create_review.html')
+
+
+
+
+
+
+
+
+
+
+
+
