@@ -11,6 +11,12 @@ urlpatterns = [
     path('mobile/products/delete/<int:product_id>/', views.ProductDeleteView.as_view(), name='product-delete'),
     path('mobile/order/', views.OrderCreateView.as_view(), name='order-create'),
     path('mobile/review/', views.ReviewCreateView.as_view(), name='review-create'),
+    
+    
+    path('mobile/products/', views.product_list_view, name='product-list'),
+    path('mobile/products/<int:product_id>/', views.product_detail_view, name='product-detail'),
+    path('mobile/orders/', views.order_list_view, name='order-list'),
+    path('mobile/reviews/', views.review_list_view, name='review-list'),
 ]
 
 if settings.DEBUG:
