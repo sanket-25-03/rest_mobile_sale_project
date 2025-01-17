@@ -6,7 +6,7 @@ from . import views
 urlpatterns = [
     path('mobile/', views.index, name='index'), 
     path('mobile/products/create/', views.ProductCreateView.as_view(), name='product-create'),
-    path('mobile/products/update/<int:product_id>/', views.ProductUpdateView.as_view(), name='product-update'),  # Update product endpoint    
+    path('mobile/products/update/<int:product_id>/', views.ProductUpdateView.as_view(), name='product-update'),
     path('mobile/products/filter/', views.ProductListView.as_view(), name='product-list'),  
     path('mobile/products/delete/<int:product_id>/', views.ProductDeleteView.as_view(), name='product-delete'),
     path('mobile/order/', views.OrderCreateView.as_view(), name='order-create'),

@@ -7,7 +7,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ['model_number', 'reviews']
 
 class ProductSerializer(serializers.ModelSerializer):
-    reviews = ReviewSerializer(many=True, read_only=True)  # Include reviews in product details
+    reviews = ReviewSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
