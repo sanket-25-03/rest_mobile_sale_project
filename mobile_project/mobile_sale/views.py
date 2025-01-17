@@ -1,28 +1,27 @@
-from rest_framework import generics, filters, status
+from rest_framework import generics, status
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import render, redirect
-from .models import Product, Order, Reviews
+from .models import Product, Order
 from .serializers import ProductSerializer, OrderSerializer
-from django.contrib.auth.models import User
-from django.http import HttpResponse
-
-
-from django_filters import rest_framework as filters
-
-class ProductFilter(filters.FilterSet):
-    price_min = filters.NumberFilter(field_name="price", lookup_expr="gte")
-    price_max = filters.NumberFilter(field_name="price", lookup_expr="lte")
-    brand = filters.CharFilter(field_name="brand", lookup_expr="icontains")
-
-    class Meta:
-        model = Product
-        fields = ['price_min', 'price_max', 'brand']
+from rest_framework import generics
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+from .filters import ProductFilter 
 
 class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = ProductFilter
+
+    search_fields = ['name', 'brand']
+    ordering_fields = ['price', 'name']
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        return render(request, 'mobile_sale/product_list.html', {'products': response.data})
 
 
 class ProductCreateView(generics.CreateAPIView):
@@ -52,7 +51,18 @@ def order_list(request):
     return render(request, 'mobile_sale/orders.html', {'orders': orders})
 
 
-def add_product_view(request):
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Product
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Product
+from django.views.decorators.csrf import csrf_exempt
+
+def add_product_view(request, product_id=None):
+    product = None
+    if product_id:
+        product = get_object_or_404(Product, id=product_id)
+
     if request.method == 'POST':
         name = request.POST.get('name')
         brand = request.POST.get('brand')
@@ -61,125 +71,61 @@ def add_product_view(request):
         quantity = request.POST.get('quantity')
         prod_image = request.FILES.get('prod_image')
 
-        Product.objects.create(
-            name=name,
-            brand=brand,
-            price=price,
-            description=description,
-            quantity=quantity,
-            prod_image=prod_image
-        )
-        return redirect('index') 
-    return render(request, 'mobile_sale/AddProducts.html')
+        if product:
+            # Update existing product
+            product.name = name
+            product.brand = brand
+            product.price = price
+            product.description = description
+            product.quantity = quantity
+            if prod_image:
+                product.prod_image = prod_image
+            product.save()
+        else:
+            # Create a new product
+            Product.objects.create(
+                name=name,
+                brand=brand,
+                price=price,
+                description=description,
+                quantity=quantity,
+                prod_image=prod_image
+            )
+        return redirect('index')
+
+    return render(request, 'mobile_sale/AddProducts.html', {'product': product})
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from .models import Product, Order
 
 def create_order_view(request):
     if request.method == 'POST':
         product_id = request.POST.get('product')
         quantity = request.POST.get('quantity')
-        product = Product.objects.get(id=product_id)
-        Order.objects.create(product=product, quantity=quantity, username=request.user)
-        return redirect('order-list')
-    return render(request, 'mobile_sale/Order.html')
+        order_date = request.POST.get('order_date')
+
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return render(request, 'mobile_sale/Order.html', {'error': 'Invalid product selected.'})
+
+        Order.objects.create(
+            product=product,
+            quantity=quantity,
+            order_date=order_date
+        )
+
+    products = Product.objects.all()
+    context = {
+        'products': products,
+    }
+    return render(request, 'mobile_sale/Order.html', context)
+
+
 
 from django.shortcuts import render
 
 def create_order(request):
     brand_name = request.GET.get('brand_name', 'Default Brand')
     return render(request, 'create_order.html', {'brand_name': brand_name})
-
-
-# view for the Review list
-
-def review_list(request):
-
-    # Fetch all reviews from the database
-
-    reviews = Reviews.objects.all()
-
-    overall_average_rating = 4.5  # Replace with actual calculation if needed
-
-
-
-    context = {
-
-        'reviews': reviews,
-
-        'overall_average_rating': overall_average_rating,
-
-        'range': range(1, 6),  # Used for dropdowns
-
-    }
-
-    return render(request, 'reviews.html', context)
-
-
-
-def submit_review(request):
-
-    if request.method == 'POST':
-
-        review_text = request.POST.get('review_text')
-
-        
-
-
-
-def submit_review(request):
-
-    if request.method == "POST":
-
-        # Process the form or data
-
-        return HttpResponse("Review submitted successfully!")
-
-    else:
-
-        return HttpResponse("Invalid request method", status=405)
-
-
-
-
-
-# View to create and save a review
-
-def create_review(request):
-
-    if request.method == 'POST':
-
-        review_text = request.POST.get('review_text')  # Retrieve the review text from the form
-
-
-
-        if review_text:  # Ensure the review text is not empty
-
-            # Create and save the review
-
-            review = Reviews(reviews=review_text)
-
-            review.save()
-
-            return redirect('review_list')  # Redirect to the review list after saving
-
-        else:
-
-            # Handle empty review text case
-
-            return HttpResponse("Review text cannot be empty.", status=400)
-
-
-
-    # Render a form for creating a new review if the request method is GET
-
-    return render(request, 'create_review.html')
-
-
-
-
-
-
-
-
-
-
-
-
