@@ -71,3 +71,29 @@ class ProductDeleteView(APIView):
         product.delete()
 
         return JsonResponse({'message': 'Product deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+from django.shortcuts import render
+from .models import Product, Order, Reviews
+from .serializers import ProductSerializer, OrderSerializer, ReviewSerializer
+
+def product_list_view(request):
+    products = Product.objects.all()
+    context = {'products': products}
+    return render(request, 'product_list.html', context)
+
+def product_detail_view(request, product_id):
+    product = Product.objects.filter(id=product_id).first()
+    if not product:
+        return render(request, '404.html') 
+    context = {'product': product}
+    return render(request, 'product_detail.html', context)
+
+def order_list_view(request):
+    orders = Order.objects.all()
+    context = {'orders': orders}
+    return render(request, 'order_list.html', context)
+
+def review_list_view(request):
+    reviews = Reviews.objects.all()
+    context = {'reviews': reviews}
+    return render(request, 'review_list.html', context)
