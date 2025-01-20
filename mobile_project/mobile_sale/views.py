@@ -56,6 +56,22 @@ class ReviewCreateView(APIView):
         product.reviews.add(review)
         return JsonResponse({'message': 'Review added successfully', 'review': ReviewSerializer(review).data}, status=status.HTTP_201_CREATED)
 
+class ReviewEditView(APIView):
+    def patch(self, request, pk, *args, **kwargs):
+        try:
+            # Retrieve the review by primary key (pk)
+            review = Reviews.objects.get(pk=pk)
+        except Reviews.DoesNotExist:
+            return JsonResponse({'error': 'Review not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Partially update the review using the data provided in the request
+        serializer = ReviewSerializer(review, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse({'message': 'Review updated successfully', 'review': serializer.data}, status=status.HTTP_200_OK)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 def index(request):
     products = Product.objects.all()
     product_data = ProductSerializer(products, many=True).data

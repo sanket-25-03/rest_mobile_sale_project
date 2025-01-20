@@ -12,7 +12,8 @@ urlpatterns = [
     path('mobile/order/', views.OrderCreateView.as_view(), name='order-create'),
     path('mobile/order/<int:pk>/', views.OrderEditView.as_view(), name='order-edit'),
     path('mobile/review/', views.ReviewCreateView.as_view(), name='review-create'),
-    
+    path('mobile/review/<int:pk>/', views.ReviewEditView.as_view(), name='review-edit'),
+
     
     path('mobile/products/', views.product_list_view, name='product-list'),
     path('mobile/products/<int:product_id>/', views.product_detail_view, name='product-detail'),
