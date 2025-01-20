@@ -10,6 +10,7 @@ urlpatterns = [
     path('mobile/products/filter/', views.ProductListView.as_view(), name='product-list'),  
     path('mobile/products/delete/<int:product_id>/', views.ProductDeleteView.as_view(), name='product-delete'),
     path('mobile/order/', views.OrderCreateView.as_view(), name='order-create'),
+    path('mobile/order/<int:pk>/', views.OrderEditView.as_view(), name='order-edit'),
     path('mobile/review/', views.ReviewCreateView.as_view(), name='review-create'),
     
     

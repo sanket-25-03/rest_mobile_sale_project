@@ -27,6 +27,23 @@ class OrderCreateView(APIView):
             serializer.save()
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class OrderEditView(APIView):
+    def patch(self, request, pk, *args, **kwargs):
+        try:
+            # Retrieve the existing order by primary key (pk)
+            order = Order.objects.get(pk=pk)
+        except Order.DoesNotExist:
+            return JsonResponse({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Partially update the order using the provided data
+        serializer = OrderSerializer(order, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=status.HTTP_200_OK)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class ReviewCreateView(APIView):
     def post(self, request, *args, **kwargs):
