@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib import admin
-from .models import Product, Reviews, Inventory, Order
+from .models import Product, Reviews, Inventory
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -21,10 +21,3 @@ class InventoryAdmin(admin.ModelAdmin):
     list_display = ('product', 'imei_number', 'stock_quantity', 'os', 'ram', 'storage')
     search_fields = ('product__product_name', 'imei_number')
     list_filter = ('os',)
-
-
-@admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
-    list_display = ('user', 'order_id', 'status', 'total_price', 'created_at')
-    search_fields = ('order_id', 'user__username')
-    list_filter = ('status', 'created_at')

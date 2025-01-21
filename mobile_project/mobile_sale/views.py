@@ -1,11 +1,15 @@
+from rest_framework.exceptions import APIException
 from django.db import IntegrityError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from .models import Product, Reviews, Inventory, Order
-from .serializers import ProductSerializer, ReviewSerializer, InventorySerializer, OrderSerializer
+from .models import Product, Reviews, Inventory
+from .serializers import ProductSerializer, ReviewSerializer, InventorySerializer
 
+from django.contrib.auth.models import User
+from .serializers import UserSerializer
+from django.db import IntegrityError
 class ProductView(APIView):
     def get(self, request, pk=None):
         if pk:
@@ -127,68 +131,7 @@ class InventoryView(APIView):
         inventory = get_object_or_404(Inventory, pk=inventory_id)
         inventory.delete()
         return Response({"success": f"Inventory with ID {inventory_id} has been deleted."}, status=status.HTTP_200_OK)
-from rest_framework.exceptions import APIException
-
-class OrderView(APIView):
-    def get(self, request, pk=None):
-        try:
-            if pk:
-                order = get_object_or_404(Order, pk=pk)
-                serializer = OrderSerializer(order)
-            else:
-                orders = Order.objects.all()
-                serializer = OrderSerializer(orders, many=True)
-            return Response(serializer.data)
-        except Exception as e:
-            raise APIException(f"An error occurred: {str(e)}")
-
-    def post(self, request):
-        try:
-            serializer = OrderSerializer(data=request.data)
-            if serializer.is_valid():
-                order = serializer.save()
-                order.calculate_total_price()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            raise APIException(f"An error occurred: {str(e)}")
-
-    def put(self, request, pk=None):
-        try:
-            order_id = request.data.get("id")
-            if not order_id:
-                return Response({"error": "Order ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
-
-            order = get_object_or_404(Order, pk=order_id)
-            serializer = OrderSerializer(order, data=request.data, partial=True)
-            if serializer.is_valid():
-                order = serializer.save()
-                order.calculate_total_price()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            raise APIException(f"An error occurred: {str(e)}")
-
-    def delete(self, request, pk=None):
-        try:
-            order_id = request.data.get("id")
-            if not order_id:
-                return Response({"error": "Order ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
-
-            order = get_object_or_404(Order, pk=order_id)
-            order.delete()
-            return Response({"success": f"Order with ID {order_id} has been deleted."}, status=status.HTTP_200_OK)
-        except Exception as e:
-            raise APIException(f"An error occurred: {str(e)}")
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
-from .serializers import UserSerializer
-from django.db import IntegrityError
-
+        
 class UserView(APIView):
     def get(self, request, pk=None):
         if pk:

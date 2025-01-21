@@ -50,21 +50,3 @@ class Inventory(models.Model):
     screen_size = models.CharField(max_length=10, verbose_name="Screen Size")
     camera_details = models.TextField(null=True, blank=True, verbose_name="Camera Details")
     processor = models.CharField(max_length=50, null=True, blank=True, verbose_name="Processor")
-
-class Order(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
-    order_id = models.CharField(max_length=20, unique=True)
-    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Shipped', 'Shipped'), ('Delivered', 'Delivered'), ('Canceled', 'Canceled')], default='Pending')
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    ordered_items_list = models.JSONField()
-
-    def calculate_total_price(self):
-        total = 0
-        for item in self.ordered_items_list:
-            total += item['price'] * item['quantity']
-        self.total_price = total
-        self.save()
-        
-        self.calculate_total_price()
-        self.save()

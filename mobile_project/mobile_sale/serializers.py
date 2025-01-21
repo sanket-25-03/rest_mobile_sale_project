@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Reviews, Inventory, Order
+from .models import Product, Reviews, Inventory
 from django.contrib.auth.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,10 +19,4 @@ class ReviewSerializer(serializers.ModelSerializer):
 class InventorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Inventory
-        fields = '__all__'
-class OrderSerializer(serializers.ModelSerializer):
-    ordered_items = serializers.JSONField()
-
-    class Meta:
-        model = Order
         fields = '__all__'
