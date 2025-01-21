@@ -5,6 +5,10 @@ from . import views
 
 urlpatterns = [
     path('mobile/', views.ProductView.as_view(), name='ProductView'), 
+    path('review/', views.ReviewView.as_view(), name='ReviewView'), 
+    path('Inventory/', views.InventoryView.as_view(), name='InventoryView'), 
+    path('order/', views.OrderView.as_view(), name='OrderView'), 
+    path('order-item/', views.OrderItemView.as_view(), name='OrderItemView'), 
 ]
 
 if settings.DEBUG:
