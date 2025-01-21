@@ -31,3 +31,9 @@ class OrderAdmin(admin.ModelAdmin):
     ordering = ['-order_date']
 
 admin.site.register(Order, OrderAdmin)
+
+from django.contrib import admin
+from rest_framework.authtoken.models import Token
+
+admin.site.register(Token)
+

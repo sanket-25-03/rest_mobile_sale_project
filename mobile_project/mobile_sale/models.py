@@ -70,4 +70,14 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
+    
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Reviews)
+@receiver(post_delete, sender=Reviews)
+def update_product_ratings(sender, instance, **kwargs):
+    product = instance.product
+    product.update_ratings()
+
 
