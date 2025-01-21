@@ -2,9 +2,22 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Avg, Count
 
+from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.db import models
+
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
+    groups = models.ManyToManyField(
+        Group,
+        related_name="custom_user_set",  
+        blank=True,
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="custom_user_set",
+        blank=True,
+    )
 
     class Meta:
         constraints = [
@@ -14,7 +27,7 @@ class User(AbstractUser):
 
 class Product(models.Model):
     prod_image = models.ImageField(upload_to='products/', null=True, blank=True)
-    product_name = models.CharField(max_length=100)
+    product_name = models.CharField(max_length=100,unique=True)
     brand = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     short_description = models.TextField()
