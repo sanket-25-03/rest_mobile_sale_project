@@ -172,3 +172,47 @@ class UserView(APIView):
         user = get_object_or_404(User, pk=user_id)
         user.delete()
         return Response({"success": f"User with ID {user_id} has been deleted."}, status=status.HTTP_200_OK)
+
+from .models import Order
+from .serializers import OrderSerializer
+
+class OrderView(APIView):
+    def get(self, request, pk=None):
+        if pk:
+            order = get_object_or_404(Order, pk=pk)
+            serializer = OrderSerializer(order)
+        else:
+            orders = Order.objects.all()
+            serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = OrderSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError:
+                return Response({"error": "An integrity error occurred while saving the order."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk=None):
+        order_id = request.data.get("id")
+        if not order_id:
+            return Response({"error": "Order ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
+
+        order = get_object_or_404(Order, pk=order_id)
+        serializer = OrderSerializer(order, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk=None):
+        order_id = request.data.get("id")
+        if not order_id:
+            return Response({"error": "Order ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
+
+        order = get_object_or_404(Order, pk=order_id)
+        order.delete()
+        return Response({"success": f"Order with ID {order_id} has been deleted."}, status=status.HTTP_200_OK)

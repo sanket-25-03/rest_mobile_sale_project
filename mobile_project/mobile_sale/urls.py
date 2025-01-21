@@ -8,6 +8,7 @@ urlpatterns = [
     path('review/', views.ReviewView.as_view(), name='ReviewView'), 
     path('Inventory/', views.InventoryView.as_view(), name='InventoryView'), 
     path('user/', views.UserView.as_view(), name='UserView'), 
+    path('order/', views.OrderView.as_view(), name='OrderView'), 
 ]
 
 if settings.DEBUG:

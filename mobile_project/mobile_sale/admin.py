@@ -21,3 +21,13 @@ class InventoryAdmin(admin.ModelAdmin):
     list_display = ('product', 'imei_number', 'stock_quantity', 'os', 'ram', 'storage')
     search_fields = ('product__product_name', 'imei_number')
     list_filter = ('os',)
+    
+from .models import Order
+
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'order_date', 'total_price', 'status', 'payment_method', 'payment_status']
+    list_filter = ['status', 'payment_status', 'order_date']
+    search_fields = ['user__username', 'shipping_address']
+    ordering = ['-order_date']
+
+admin.site.register(Order, OrderAdmin)
