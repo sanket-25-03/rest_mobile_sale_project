@@ -5,6 +5,8 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Product, Reviews, Inventory, Order, OrderItem
 from .serializers import ProductSerializer, ReviewSerializer, InventorySerializer, OrderSerializer, OrderItemSerializer
+from .serializers import UserSerializer
+from django.contrib.auth import get_user_model
 
 class ProductView(APIView):
     def get(self, request, pk=None):
@@ -205,3 +207,18 @@ class OrderItemView(APIView):
         order_item = get_object_or_404(OrderItem, pk=order_item_id)
         order_item.delete()
         return Response({"success": f"OrderItem with ID {order_item_id} has been deleted."}, status=status.HTTP_200_OK)
+
+
+User = get_user_model()
+
+class UserView(APIView):
+    def post(self, request):
+        # Use the UserSerializer to validate the request data
+        serializer = UserSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            # Save the user instance
+            user = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
