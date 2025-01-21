@@ -1,19 +1,34 @@
 from rest_framework import serializers
-from .models import Reviews, Product, Order
+from .models import User, Product, Reviews, Inventory, Order, OrderItem
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email']
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reviews
-        fields = ['model_number', 'reviews']
+        fields = '__all__'
 
-class ProductSerializer(serializers.ModelSerializer):
-    reviews = ReviewSerializer(many=True, read_only=True)
-
+class InventorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
-        fields = ['id','name', 'model_number', 'brand', 'price', 'description', 'reviews', 'quantity', 'prod_image']
+        model = Inventory
+        fields = '__all__'
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = '__all__'
 
 class OrderSerializer(serializers.ModelSerializer):
+    order_items = OrderItemSerializer(many=True, source='orderitem_set')
+
     class Meta:
         model = Order
-        fields = ['id','product', 'quantity', 'order_date']
+        fields = '__all__'

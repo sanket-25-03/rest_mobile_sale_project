@@ -4,21 +4,11 @@ from django.conf.urls.static import static
 from . import views
 
 urlpatterns = [
-    path('mobile/', views.index, name='index'), 
-    path('mobile/products/create/', views.ProductCreateView.as_view(), name='product-create'),
-    path('mobile/products/update/<int:product_id>/', views.ProductUpdateView.as_view(), name='product-update'),
-    path('mobile/products/filter/', views.ProductListView.as_view(), name='product-list'),  
-    path('mobile/products/delete/<int:product_id>/', views.ProductDeleteView.as_view(), name='product-delete'),
-    path('mobile/order/', views.OrderCreateView.as_view(), name='order-create'),
-    path('mobile/order/<int:pk>/', views.OrderEditView.as_view(), name='order-edit'),
-    path('mobile/review/', views.ReviewCreateView.as_view(), name='review-create'),
-    path('mobile/review/<int:pk>/', views.ReviewEditView.as_view(), name='review-edit'),
-
-    
-    path('mobile/products/', views.product_list_view, name='product-list'),
-    path('mobile/products/<int:product_id>/', views.product_detail_view, name='product-detail'),
-    path('mobile/orders/', views.order_list_view, name='order-list'),
-    path('mobile/reviews/', views.review_list_view, name='review-list'),
+    path('mobile/', views.ProductView.as_view(), name='ProductView'), 
+    path('review/', views.ReviewView.as_view(), name='ReviewView'), 
+    path('Inventory/', views.InventoryView.as_view(), name='InventoryView'), 
+    path('order/', views.OrderView.as_view(), name='OrderView'), 
+    path('order-item/', views.OrderItemView.as_view(), name='OrderItemView'), 
 ]
 
 if settings.DEBUG:

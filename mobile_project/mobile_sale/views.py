@@ -1,132 +1,207 @@
-from django.http import JsonResponse
+from django.db import IntegrityError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Product, Order, Reviews
-from .serializers import ProductSerializer, OrderSerializer, ReviewSerializer
-from .filters import ProductFilter 
+from django.shortcuts import get_object_or_404
+from .models import Product, Reviews, Inventory, Order, OrderItem
+from .serializers import ProductSerializer, ReviewSerializer, InventorySerializer, OrderSerializer, OrderItemSerializer
 
-class ProductListView(APIView):
-    def get(self, request, *args, **kwargs):
-        product_filter = ProductFilter(request.GET, queryset=Product.objects.all())
-        products = product_filter.qs
-        product_data = ProductSerializer(products, many=True).data
-        return JsonResponse({'products': product_data})
-class ProductCreateView(APIView):
-    def post(self, request, *args, **kwargs):
+class ProductView(APIView):
+    def get(self, request, pk=None):
+        if pk:
+            product = get_object_or_404(Product, pk=pk)
+            serializer = ProductSerializer(product)
+        else:
+            products = Product.objects.all()
+            serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
-        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError:
+                return Response({"error": "A product with this name already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class OrderCreateView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = OrderSerializer(data=request.data)
+    def put(self, request):
+        product_id = request.data.get("id")
+        if not product_id:
+            return Response({"error": "Product ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
+
+        product = get_object_or_404(Product, pk=product_id)
+        serializer = ProductSerializer(product, data=request.data, partial=True)
+        if serializer.is_valid():
+            try:
+                serializer.save()
+                return Response(serializer.data)
+            except IntegrityError:
+                return Response({"error": "A product with this name already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        product_id = request.data.get("id")
+        if not product_id:
+            return Response({"error": "Product ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
+
+        product = get_object_or_404(Product, pk=product_id)
+        product.delete()
+        return Response({"success": f"Product with ID {product_id} has been deleted."}, status=status.HTTP_200_OK)
+
+
+class ReviewView(APIView):
+    def get(self, request, pk=None):
+        if pk:
+            review = get_object_or_404(Reviews, pk=pk)
+            serializer = ReviewSerializer(review)
+        else:
+            reviews = Reviews.objects.all()
+            serializer = ReviewSerializer(reviews, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ReviewSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
-        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-class OrderEditView(APIView):
-    def patch(self, request, pk, *args, **kwargs):
-        try:
-            # Retrieve the existing order by primary key (pk)
-            order = Order.objects.get(pk=pk)
-        except Order.DoesNotExist:
-            return JsonResponse({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Partially update the order using the provided data
-        serializer = OrderSerializer(order, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=status.HTTP_200_OK)
-        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, pk=None):
+        review_id = request.data.get("id")
+        if not review_id:
+            return Response({"error": "Review ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
 
-
-
-class ReviewCreateView(APIView):
-    def post(self, request, *args, **kwargs):
-        model_number = request.data.get('model_number')
-        product = Product.objects.filter(model_number=model_number).first()
-        if not product:
-            return JsonResponse({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
-        review_data = request.data.get('reviews')
-        review = Reviews.objects.create(model_number=model_number, reviews=review_data)
-        product.reviews.add(review)
-        return JsonResponse({'message': 'Review added successfully', 'review': ReviewSerializer(review).data}, status=status.HTTP_201_CREATED)
-
-class ReviewEditView(APIView):
-    def patch(self, request, pk, *args, **kwargs):
-        try:
-            # Retrieve the review by primary key (pk)
-            review = Reviews.objects.get(pk=pk)
-        except Reviews.DoesNotExist:
-            return JsonResponse({'error': 'Review not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        # Partially update the review using the data provided in the request
+        review = get_object_or_404(Reviews, pk=review_id)
         serializer = ReviewSerializer(review, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse({'message': 'Review updated successfully', 'review': serializer.data}, status=status.HTTP_200_OK)
-        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk=None):
+        review_id = request.data.get("id")
+        if not review_id:
+            return Response({"error": "Review ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
+
+        review = get_object_or_404(Reviews, pk=review_id)
+        review.delete()
+        return Response({"success": f"Review with ID {review_id} has been deleted."}, status=status.HTTP_200_OK)
 
 
-def index(request):
-    products = Product.objects.all()
-    product_data = ProductSerializer(products, many=True).data
-    return JsonResponse({'products': product_data})
+class InventoryView(APIView):
+    def get(self, request, pk=None):
+        if pk:
+            inventory = get_object_or_404(Inventory, pk=pk)
+            serializer = InventorySerializer(inventory)
+        else:
+            inventories = Inventory.objects.all()
+            serializer = InventorySerializer(inventories, many=True)
+        return Response(serializer.data)
 
-
-class ProductUpdateView(APIView):
-    def patch(self, request, *args, **kwargs):
-        product_id = kwargs.get('product_id')
-        product = Product.objects.filter(id=product_id).first()
-
-        if not product:
-            return JsonResponse({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = ProductSerializer(product, data=request.data, partial=True)
+    def post(self, request):
+        serializer = InventorySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse({'message': 'Product updated successfully', 'product': serializer.data}, status=status.HTTP_200_OK)
-        
-        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ProductDeleteView(APIView):
-    def delete(self, request, *args, **kwargs):
-        product_id = kwargs.get('product_id')
-        product = Product.objects.filter(id=product_id).first()
+    def put(self, request, pk=None):
+        inventory_id = request.data.get("id")
+        if not inventory_id:
+            return Response({"error": "Inventory ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not product:
-            return JsonResponse({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+        inventory = get_object_or_404(Inventory, pk=inventory_id)
+        serializer = InventorySerializer(inventory, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        product.delete()
+    def delete(self, request, pk=None):
+        inventory_id = request.data.get("id")
+        if not inventory_id:
+            return Response({"error": "Inventory ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return JsonResponse({'message': 'Product deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        inventory = get_object_or_404(Inventory, pk=inventory_id)
+        inventory.delete()
+        return Response({"success": f"Inventory with ID {inventory_id} has been deleted."}, status=status.HTTP_200_OK)
 
-from django.shortcuts import render
-from .models import Product, Order, Reviews
-from .serializers import ProductSerializer, OrderSerializer, ReviewSerializer
 
-def product_list_view(request):
-    products = Product.objects.all()
-    context = {'products': products}
-    return render(request, 'product_list.html', context)
+class OrderView(APIView):
+    def get(self, request, pk=None):
+        if pk:
+            order = get_object_or_404(Order, pk=pk)
+            serializer = OrderSerializer(order)
+        else:
+            orders = Order.objects.all()
+            serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
 
-def product_detail_view(request, product_id):
-    product = Product.objects.filter(id=product_id).first()
-    if not product:
-        return render(request, '404.html') 
-    context = {'product': product}
-    return render(request, 'product_detail.html', context)
+    def post(self, request):
+        serializer = OrderSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-def order_list_view(request):
-    orders = Order.objects.all()
-    context = {'orders': orders}
-    return render(request, 'order_list.html', context)
+    def put(self, request, pk=None):
+        order_id = request.data.get("id")
+        if not order_id:
+            return Response({"error": "Order ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
 
-def review_list_view(request):
-    reviews = Reviews.objects.all()
-    context = {'reviews': reviews}
-    return render(request, 'review_list.html', context)
+        order = get_object_or_404(Order, pk=order_id)
+        serializer = OrderSerializer(order, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk=None):
+        order_id = request.data.get("id")
+        if not order_id:
+            return Response({"error": "Order ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
+
+        order = get_object_or_404(Order, pk=order_id)
+        order.delete()
+        return Response({"success": f"Order with ID {order_id} has been deleted."}, status=status.HTTP_200_OK)
+
+
+class OrderItemView(APIView):
+    def get(self, request, pk=None):
+        if pk:
+            order_item = get_object_or_404(OrderItem, pk=pk)
+            serializer = OrderItemSerializer(order_item)
+        else:
+            order_items = OrderItem.objects.all()
+            serializer = OrderItemSerializer(order_items, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = OrderItemSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk=None):
+        order_item_id = request.data.get("id")
+        if not order_item_id:
+            return Response({"error": "OrderItem ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
+
+        order_item = get_object_or_404(OrderItem, pk=order_item_id)
+        serializer = OrderItemSerializer(order_item, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk=None):
+        order_item_id = request.data.get("id")
+        if not order_item_id:
+            return Response({"error": "OrderItem ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
+
+        order_item = get_object_or_404(OrderItem, pk=order_item_id)
+        order_item.delete()
+        return Response({"success": f"OrderItem with ID {order_item_id} has been deleted."}, status=status.HTTP_200_OK)
