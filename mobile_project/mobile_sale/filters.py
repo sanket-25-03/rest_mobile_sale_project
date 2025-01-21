@@ -1,12 +1,30 @@
-import django_filters
-from .models import Product
+from django_filters import rest_framework as filters
+from .models import Product, Reviews, Order
 
-class ProductFilter(django_filters.FilterSet):
-    min_price = django_filters.NumberFilter(field_name="price", lookup_expr='gte', label='Min Price')
-    max_price = django_filters.NumberFilter(field_name="price", lookup_expr='lte', label='Max Price')
-    
-    brand = django_filters.CharFilter(field_name="brand", lookup_expr='icontains', label='Brand')
-    
+class ProductFilter(filters.FilterSet):
     class Meta:
         model = Product
-        fields = ['min_price', 'max_price', 'brand']
+        fields = {
+            'product_name': ['icontains'],
+            'brand': ['icontains'],
+            'category': ['exact'],
+            'price': ['gte', 'lte'],
+        }
+
+class ReviewFilter(filters.FilterSet):
+    class Meta:
+        model = Reviews
+        fields = {
+            'product': ['exact'],
+            'user': ['exact'],
+            'overall_rating': ['gte', 'lte'],
+        }
+
+class OrderFilter(filters.FilterSet):
+    class Meta:
+        model = Order
+        fields = {
+            'user': ['exact'],
+            'status': ['exact'],
+            'created_at': ['date__gte', 'date__lte'],
+        }
