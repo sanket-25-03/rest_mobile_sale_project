@@ -1,29 +1,6 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Avg, Count
-
-from django.contrib.auth.models import AbstractUser, Group, Permission
-from django.db import models
-
-
-class User(AbstractUser):
-    email = models.EmailField(unique=True)
-    groups = models.ManyToManyField(
-        Group,
-        related_name="custom_user_set",  
-        blank=True,
-    )
-    user_permissions = models.ManyToManyField(
-        Permission,
-        related_name="custom_user_set",
-        blank=True,
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['username', 'email'], name='unique_username_email')
-        ]
-
+from django.contrib.auth.models import User
 
 class Product(models.Model):
     prod_image = models.ImageField(upload_to='products/', null=True, blank=True)
@@ -74,31 +51,20 @@ class Inventory(models.Model):
     camera_details = models.TextField(null=True, blank=True, verbose_name="Camera Details")
     processor = models.CharField(max_length=50, null=True, blank=True, verbose_name="Processor")
 
-
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     order_id = models.CharField(max_length=20, unique=True)
-    ordered_items = models.ManyToManyField(Product, through='OrderItem')
+    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Shipped', 'Shipped'), ('Delivered', 'Delivered'), ('Canceled', 'Canceled')], default='Pending')
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    status = models.CharField(max_length=20, choices=[
-        ('Pending', 'Pending'),
-        ('Shipped', 'Shipped'),
-        ('Delivered', 'Delivered'),
-        ('Canceled', 'Canceled')
-    ], default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
+    ordered_items_list = models.JSONField()
 
     def calculate_total_price(self):
-        self.total_price = sum(item.total_price for item in self.orderitem_set.all())
+        total = 0
+        for item in self.ordered_items_list:
+            total += item['price'] * item['quantity']
+        self.total_price = total
         self.save()
-
-
-class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
-
-    def save(self, *args, **kwargs):
-        self.total_price = self.product.price * self.quantity
-        super().save(*args, **kwargs)
+        
+        self.calculate_total_price()
+        self.save()

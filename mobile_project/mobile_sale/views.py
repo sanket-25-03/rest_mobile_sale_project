@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from .models import Product, Reviews, Inventory, Order, OrderItem
-from .serializers import ProductSerializer, ReviewSerializer, InventorySerializer, OrderSerializer, OrderItemSerializer
+from .models import Product, Reviews, Inventory, Order
+from .serializers import ProductSerializer, ReviewSerializer, InventorySerializer, OrderSerializer
 
 class ProductView(APIView):
     def get(self, request, pk=None):
@@ -127,81 +127,105 @@ class InventoryView(APIView):
         inventory = get_object_or_404(Inventory, pk=inventory_id)
         inventory.delete()
         return Response({"success": f"Inventory with ID {inventory_id} has been deleted."}, status=status.HTTP_200_OK)
-
+from rest_framework.exceptions import APIException
 
 class OrderView(APIView):
     def get(self, request, pk=None):
-        if pk:
-            order = get_object_or_404(Order, pk=pk)
-            serializer = OrderSerializer(order)
-        else:
-            orders = Order.objects.all()
-            serializer = OrderSerializer(orders, many=True)
-        return Response(serializer.data)
+        try:
+            if pk:
+                order = get_object_or_404(Order, pk=pk)
+                serializer = OrderSerializer(order)
+            else:
+                orders = Order.objects.all()
+                serializer = OrderSerializer(orders, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            raise APIException(f"An error occurred: {str(e)}")
 
     def post(self, request):
-        serializer = OrderSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer = OrderSerializer(data=request.data)
+            if serializer.is_valid():
+                order = serializer.save()
+                order.calculate_total_price()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            raise APIException(f"An error occurred: {str(e)}")
 
     def put(self, request, pk=None):
-        order_id = request.data.get("id")
-        if not order_id:
-            return Response({"error": "Order ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            order_id = request.data.get("id")
+            if not order_id:
+                return Response({"error": "Order ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
 
-        order = get_object_or_404(Order, pk=order_id)
-        serializer = OrderSerializer(order, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            order = get_object_or_404(Order, pk=order_id)
+            serializer = OrderSerializer(order, data=request.data, partial=True)
+            if serializer.is_valid():
+                order = serializer.save()
+                order.calculate_total_price()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            raise APIException(f"An error occurred: {str(e)}")
 
     def delete(self, request, pk=None):
-        order_id = request.data.get("id")
-        if not order_id:
-            return Response({"error": "Order ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            order_id = request.data.get("id")
+            if not order_id:
+                return Response({"error": "Order ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
 
-        order = get_object_or_404(Order, pk=order_id)
-        order.delete()
-        return Response({"success": f"Order with ID {order_id} has been deleted."}, status=status.HTTP_200_OK)
+            order = get_object_or_404(Order, pk=order_id)
+            order.delete()
+            return Response({"success": f"Order with ID {order_id} has been deleted."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            raise APIException(f"An error occurred: {str(e)}")
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
+from .serializers import UserSerializer
+from django.db import IntegrityError
 
-class OrderItemView(APIView):
+class UserView(APIView):
     def get(self, request, pk=None):
         if pk:
-            order_item = get_object_or_404(OrderItem, pk=pk)
-            serializer = OrderItemSerializer(order_item)
+            user = get_object_or_404(User, pk=pk)
+            serializer = UserSerializer(user)
         else:
-            order_items = OrderItem.objects.all()
-            serializer = OrderItemSerializer(order_items, many=True)
+            users = User.objects.all()
+            serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = OrderItemSerializer(data=request.data)
+        serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            try:
+                user = serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError:
+                return Response({"error": "A user with this username or email already exists."}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk=None):
-        order_item_id = request.data.get("id")
-        if not order_item_id:
-            return Response({"error": "OrderItem ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
+        user_id = request.data.get("id")
+        if not user_id:
+            return Response({"error": "User ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
 
-        order_item = get_object_or_404(OrderItem, pk=order_item_id)
-        serializer = OrderItemSerializer(order_item, data=request.data, partial=True)
+        user = get_object_or_404(User, pk=user_id)
+        serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk=None):
-        order_item_id = request.data.get("id")
-        if not order_item_id:
-            return Response({"error": "OrderItem ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
+        user_id = request.data.get("id")
+        if not user_id:
+            return Response({"error": "User ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
 
-        order_item = get_object_or_404(OrderItem, pk=order_item_id)
-        order_item.delete()
-        return Response({"success": f"OrderItem with ID {order_item_id} has been deleted."}, status=status.HTTP_200_OK)
+        user = get_object_or_404(User, pk=user_id)
+        user.delete()
+        return Response({"success": f"User with ID {user_id} has been deleted."}, status=status.HTTP_200_OK)
