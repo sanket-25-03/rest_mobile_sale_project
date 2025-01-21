@@ -70,10 +70,15 @@ WSGI_APPLICATION = 'mobile_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'mobile_sale_database',
+        'USER': 'postgres',  
+        'PASSWORD': 'sanket@123',  
+        'HOST': 'localhost', 
+        'PORT': '5432',  
     }
 }
+
 
 
 # Password validation
