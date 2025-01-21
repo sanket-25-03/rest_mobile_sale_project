@@ -2,7 +2,6 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from . import views
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     path('mobile/', views.ProductView.as_view(), name='ProductView'), 

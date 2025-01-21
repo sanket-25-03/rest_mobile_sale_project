@@ -6,10 +6,10 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Product, Reviews, Inventory
 from .serializers import ProductSerializer, ReviewSerializer, InventorySerializer
-
 from django.contrib.auth.models import User
 from .serializers import UserSerializer
 from django.db import IntegrityError
+
 class ProductView(APIView):
     def get(self, request, pk=None):
         if pk:
@@ -54,29 +54,25 @@ class ProductView(APIView):
         product.delete()
         return Response({"success": f"Product with ID {product_id} has been deleted."}, status=status.HTTP_200_OK)
 
-from rest_framework.permissions import IsAuthenticated
-
 class ReviewView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request, pk=None):
         if pk:
-            review = get_object_or_404(Reviews, pk=pk, user=request.user)
+            review = get_object_or_404(Reviews, pk=pk)
             serializer = ReviewSerializer(review)
         else:
-            reviews = Reviews.objects.filter(user=request.user)
+            reviews = Reviews.objects.all()
             serializer = ReviewSerializer(reviews, many=True)
         return Response(serializer.data)
 
     def post(self, request):
         serializer = ReviewSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk=None):
-        review = get_object_or_404(Reviews, pk=request.data.get("id"), user=request.user)
+        review = get_object_or_404(Reviews, pk=request.data.get("id"))
         serializer = ReviewSerializer(review, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -84,10 +80,9 @@ class ReviewView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk=None):
-        review = get_object_or_404(Reviews, pk=request.data.get("id"), user=request.user)
+        review = get_object_or_404(Reviews, pk=request.data.get("id"))
         review.delete()
         return Response({"success": "Review deleted."}, status=status.HTTP_200_OK)
-
 
 class InventoryView(APIView):
     def get(self, request, pk=None):
@@ -127,11 +122,7 @@ class InventoryView(APIView):
         inventory.delete()
         return Response({"success": f"Inventory with ID {inventory_id} has been deleted."}, status=status.HTTP_200_OK)
 
-from rest_framework.permissions import IsAuthenticated
-
 class UserView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request, pk=None):
         user = request.user
         serializer = UserSerializer(user)
@@ -150,32 +141,25 @@ class UserView(APIView):
         user.delete()
         return Response({"success": "User deleted."}, status=status.HTTP_200_OK)
 
-from .models import Order
-from .serializers import OrderSerializer
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import IsAuthenticated
-
 class OrderView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request, pk=None):
         if pk:
-            order = get_object_or_404(Order, pk=pk, user=request.user)
+            order = get_object_or_404(Order, pk=pk)
             serializer = OrderSerializer(order)
         else:
-            orders = Order.objects.filter(user=request.user)
+            orders = Order.objects.all()
             serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
     def post(self, request):
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk=None):
-        order = get_object_or_404(Order, pk=request.data.get("id"), user=request.user)
+        order = get_object_or_404(Order, pk=request.data.get("id"))
         serializer = OrderSerializer(order, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -183,6 +167,6 @@ class OrderView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk=None):
-        order = get_object_or_404(Order, pk=request.data.get("id"), user=request.user)
+        order = get_object_or_404(Order, pk=request.data.get("id"))
         order.delete()
         return Response({"success": "Order deleted."}, status=status.HTTP_200_OK)

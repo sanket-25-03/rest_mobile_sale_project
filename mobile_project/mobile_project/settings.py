@@ -30,18 +30,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'mobile_sale',
     'django_filters',
-    'rest_framework_simplejwt',
-    'rest_framework',
-    'rest_framework.authtoken',
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-}
 MIDDLEWARE = [
-    'mobile_sale.middleware.JSONAuthMiddleware'
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
