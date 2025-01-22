@@ -27,6 +27,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id', 'user', 'order_date', 'shipping_address', 'total_price', 'status', 'payment_method', 'payment_status']
+        
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
