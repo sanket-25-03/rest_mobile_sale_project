@@ -1,6 +1,12 @@
 from django.contrib import admin
-from django.contrib import admin
-from .models import Product, Reviews, Inventory
+from .models import User, Product, Reviews, Inventory, Order, OrderItem
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('username', 'email', 'is_staff', 'is_active')
+    search_fields = ('username', 'email')
+    list_filter = ('is_staff', 'is_active')
+
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -21,13 +27,16 @@ class InventoryAdmin(admin.ModelAdmin):
     list_display = ('product', 'imei_number', 'stock_quantity', 'os', 'ram', 'storage')
     search_fields = ('product__product_name', 'imei_number')
     list_filter = ('os',)
-    
-from .models import Order
 
+
+@admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'order_date', 'total_price', 'status', 'payment_method', 'payment_status']
-    list_filter = ['status', 'payment_status', 'order_date']
-    search_fields = ['user__username', 'shipping_address']
-    ordering = ['-order_date']
+    list_display = ('user', 'order_id', 'status', 'total_price', 'created_at')
+    search_fields = ('order_id', 'user__username')
+    list_filter = ('status', 'created_at')
 
-admin.site.register(Order, OrderAdmin)
+
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = ('order', 'product', 'quantity', 'total_price')
+    search_fields = ('order__order_id', 'product__product_name')
