@@ -135,25 +135,6 @@ class InventoryView(APIView):
         inventory.delete()
         return Response({"success": f"Inventory with ID {inventory_id} has been deleted."}, status=status.HTTP_200_OK)
 
-class UserView(APIView):
-    
-    def get(self, request, pk=None):
-        user = request.user
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
-
-    def put(self, request):
-        user = request.user
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request):
-        user = request.user
-        user.delete()
-        return Response({"success": "User deleted."}, status=status.HTTP_200_OK)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 
@@ -229,26 +210,5 @@ class LoginAPI(APIView):
             'token': token.key,
             'user': UserSerializer(user).data
         }, status=status.HTTP_200_OK)
-        
-from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
-from rest_framework import status
 
 
-
-class RegisterAPI(APIView):
-    def post(self, request):
-        data = request.data
-        serializer = RegisterSerializer(data=data)
-        
-        if not serializer.is_valid():
-            return Response({
-                'message': serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        user = serializer.save()
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'user': UserSerializer(user).data
-        }, status=status.HTTP_201_CREATED)
