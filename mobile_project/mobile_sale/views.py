@@ -154,28 +154,31 @@ class UserView(APIView):
         user = request.user
         user.delete()
         return Response({"success": "User deleted."}, status=status.HTTP_200_OK)
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 
 class OrderView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
     def get(self, request, pk=None):
         if pk:
-            order = get_object_or_404(Order, pk=pk)
+            order = get_object_or_404(Order, pk=pk, user=request.user)
             serializer = OrderSerializer(order)
         else:
-            orders = Order.objects.all()
+            orders = Order.objects.filter(user=request.user)
             serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
     def post(self, request):
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk=None):
-        order = get_object_or_404(Order, pk=request.data.get("id"))
+        order = get_object_or_404(Order, pk=request.data.get("id"), user=request.user)
         serializer = OrderSerializer(order, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -183,15 +186,9 @@ class OrderView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk=None):
-        order = get_object_or_404(Order, pk=request.data.get("id"))
+        order = get_object_or_404(Order, pk=request.data.get("id"), user=request.user)
         order.delete()
         return Response({"success": "Order deleted."}, status=status.HTTP_200_OK)
-
-from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
-from rest_framework import status
-
-
 
 class RegisterAPI(APIView):
     def post(self, request):
@@ -232,3 +229,26 @@ class LoginAPI(APIView):
             'token': token.key,
             'user': UserSerializer(user).data
         }, status=status.HTTP_200_OK)
+        
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
+from rest_framework import status
+
+
+
+class RegisterAPI(APIView):
+    def post(self, request):
+        data = request.data
+        serializer = RegisterSerializer(data=data)
+        
+        if not serializer.is_valid():
+            return Response({
+                'message': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = serializer.save()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user': UserSerializer(user).data
+        }, status=status.HTTP_201_CREATED)
