@@ -9,6 +9,8 @@ urlpatterns = [
     path('Inventory/', views.InventoryView.as_view(), name='InventoryView'), 
     path('user/', views.UserView.as_view(), name='UserView'), 
     path('order/', views.OrderView.as_view(), name='OrderView'), 
+    path('register/', views.RegisterAPI.as_view(), name='RegisterAPI'),
+    path('login/', views.LoginAPI.as_view(), name='LoginAPI'),
 ]
 
 if settings.DEBUG:
