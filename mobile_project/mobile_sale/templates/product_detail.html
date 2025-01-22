@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #0056b3;
+        }
+        p {
+            text-align: center;
+            font-size: 18px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px auto;
+            max-width: 600px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        li {
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        li:last-child {
+            border-bottom: none;
+        }
+        a {
+            display: block;
+            text-align: center;
+            margin: 20px auto;
+            max-width: 200px;
+            padding: 10px;
+            text-decoration: none;
+            background-color: #0056b3;
+            color: #fff;
+            border-radius: 5px;
+        }
+        a:hover {
+            background-color: #003f7f;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ product.name }}</h1>
+    <p>Price: {{ product.price }}</p>
+    <p>Description: {{ product.description }}</p>
+
+    <h2>Reviews:</h2>
+    <ul>
+        {% for review in product.reviews.all %}
+            <li>{{ review.reviews }}</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'product-list' %}">Back to Product List</a>
+</body>
+</html>

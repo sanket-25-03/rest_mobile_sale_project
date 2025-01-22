@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Orders</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            background-color: #4caf50;
+            color: #fff;
+            padding: 15px 0;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px auto;
+            max-width: 600px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        li {
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Order List</h1>
+    <ul>
+        {% for order in orders %}
+            <li>Order ID: {{ order.id }} - Date: {{ order.date }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
