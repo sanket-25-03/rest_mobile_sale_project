@@ -1,6 +1,29 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Avg, Count
-from django.contrib.auth.models import User
+
+from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.db import models
+
+
+class User(AbstractUser):
+    email = models.EmailField(unique=True)
+    groups = models.ManyToManyField(
+        Group,
+        related_name="custom_user_set",  
+        blank=True,
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="custom_user_set",
+        blank=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['username', 'email'], name='unique_username_email')
+        ]
+
 
 class Product(models.Model):
     prod_image = models.ImageField(upload_to='products/', null=True, blank=True)
@@ -51,33 +74,31 @@ class Inventory(models.Model):
     camera_details = models.TextField(null=True, blank=True, verbose_name="Camera Details")
     processor = models.CharField(max_length=50, null=True, blank=True, verbose_name="Processor")
 
+
 class Order(models.Model):
-    ORDER_STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('processing', 'Processing'),
-        ('shipped', 'Shipped'),
-        ('delivered', 'Delivered'),
-        ('canceled', 'Canceled'),
-    ]
-    
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    order_date = models.DateTimeField(auto_now_add=True)
-    shipping_address = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    order_id = models.CharField(max_length=20, unique=True)
+    ordered_items = models.ManyToManyField(Product, through='OrderItem')
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    status = models.CharField(max_length=20, choices=[
+        ('Pending', 'Pending'),
+        ('Shipped', 'Shipped'),
+        ('Delivered', 'Delivered'),
+        ('Canceled', 'Canceled')
+    ], default='Pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def calculate_total_price(self):
+        self.total_price = sum(item.total_price for item in self.orderitem_set.all())
+        self.save()
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=10, choices=ORDER_STATUS_CHOICES, default='pending')
-    payment_method = models.CharField(max_length=50)
-    payment_status = models.CharField(max_length=50, default="Pending")
 
-    def __str__(self):
-        return f"Order #{self.id} by {self.user.username}"
-    
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
-
-@receiver(post_save, sender=Reviews)
-@receiver(post_delete, sender=Reviews)
-def update_product_ratings(sender, instance, **kwargs):
-    product = instance.product
-    product.update_ratings()
-
-
+    def save(self, *args, **kwargs):
+        self.total_price = self.product.price * self.quantity
+        super().save(*args, **kwargs)
