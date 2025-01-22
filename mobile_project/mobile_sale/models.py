@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 class Product(models.Model):
     prod_image = models.ImageField(upload_to='products/', null=True, blank=True)
-    product_name = models.CharField(max_length=100, unique=True)
+    product_name = models.CharField(max_length=100,unique=True)
     brand = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     short_description = models.TextField()
@@ -21,6 +21,7 @@ class Product(models.Model):
         self.reviews_count = reviews_data['count_reviews']
         self.save()
 
+
 class Reviews(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
@@ -35,6 +36,7 @@ class Reviews(models.Model):
     def save(self, *args, **kwargs):
         self.overall_rating = (self.quality_rating + self.performance_rating + self.user_exp_rating) / 3
         super().save(*args, **kwargs)
+
 
 class Inventory(models.Model):
     product = models.OneToOneField('Product', on_delete=models.CASCADE, related_name='inventory')
@@ -57,7 +59,7 @@ class Order(models.Model):
         ('delivered', 'Delivered'),
         ('canceled', 'Canceled'),
     ]
-
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now_add=True)
     shipping_address = models.TextField()
@@ -66,6 +68,9 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=50)
     payment_status = models.CharField(max_length=50, default="Pending")
 
+    def __str__(self):
+        return f"Order #{self.id} by {self.user.username}"
+    
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
@@ -74,3 +79,5 @@ from django.dispatch import receiver
 def update_product_ratings(sender, instance, **kwargs):
     product = instance.product
     product.update_ratings()
+
+
