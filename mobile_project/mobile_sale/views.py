@@ -4,11 +4,79 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Product, Reviews, Inventory, Order, OrderItem
-from .serializers import ProductSerializer, ReviewSerializer, InventorySerializer, OrderSerializer, OrderItemSerializer
-from .serializers import UserSerializer
+from .serializers import ProductSerializer, ReviewSerializer, InventorySerializer, OrderSerializer, OrderItemSerializer, UserSerializer
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.models import User
+from .serializers import UserSerializer  
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
 
+class LoginView(APIView):
+    permission_classes = [AllowAny]  # Allow anyone to access this endpoint
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        if not username or not password:
+            return Response(
+                {'detail': 'Username and password are required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = User.objects.filter(username=username).first()
+        if user and user.check_password(password):
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            })
+        return Response(
+            {'detail': 'Invalid username or password.'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+User = get_user_model()
+
+@csrf_exempt
+def register(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            username = data.get('username')
+            password = data.get('password')
+            email = data.get('email')
+
+            # Validate input
+            if not username or not password or not email:
+                return JsonResponse({'error': 'All fields are required.'}, status=400)
+
+            # Check if the user already exists
+            if User.objects.filter(username=username).exists():
+                return JsonResponse({'error': 'Username already exists.'}, status=400)
+
+            if User.objects.filter(email=email).exists():
+                return JsonResponse({'error': 'Email already exists.'}, status=400)
+
+            # Create the user
+            user = User.objects.create_user(username=username, password=password, email=email)
+
+            return JsonResponse({'message': 'User created successfully.'}, status=201)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid HTTP method.'}, status=405)
+
+
+from rest_framework.permissions import IsAuthenticated
+
 class ProductView(APIView):
+    permission_classes = [IsAuthenticated]  
+    
     def get(self, request, pk=None):
         if pk:
             product = get_object_or_404(Product, pk=pk)
@@ -25,35 +93,29 @@ class ProductView(APIView):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except IntegrityError:
-                return Response({"error": "A product with this name already exists."}, status=status.HTTP_400_BAD_REQUEST)
+                return handle_integrity_error("create the product")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request):
-        product_id = request.data.get("id")
-        if not product_id:
-            return Response({"error": "Product ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
-
-        product = get_object_or_404(Product, pk=product_id)
+    def put(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
         serializer = ProductSerializer(product, data=request.data, partial=True)
         if serializer.is_valid():
             try:
                 serializer.save()
                 return Response(serializer.data)
             except IntegrityError:
-                return Response({"error": "A product with this name already exists."}, status=status.HTTP_400_BAD_REQUEST)
+                return handle_integrity_error("update the product")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request):
-        product_id = request.data.get("id")
-        if not product_id:
-            return Response({"error": "Product ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
-
-        product = get_object_or_404(Product, pk=product_id)
+    def delete(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
         product.delete()
-        return Response({"success": f"Product with ID {product_id} has been deleted."}, status=status.HTTP_200_OK)
+        return Response({"success": f"Product with ID {pk} has been deleted."}, status=status.HTTP_200_OK)
 
 
 class ReviewView(APIView):
+    permission_classes = [IsAuthenticated]  
+
     def get(self, request, pk=None):
         if pk:
             review = get_object_or_404(Reviews, pk=pk)
@@ -70,29 +132,23 @@ class ReviewView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, pk=None):
-        review_id = request.data.get("id")
-        if not review_id:
-            return Response({"error": "Review ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
-
-        review = get_object_or_404(Reviews, pk=review_id)
+    def put(self, request, pk):
+        review = get_object_or_404(Reviews, pk=pk)
         serializer = ReviewSerializer(review, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk=None):
-        review_id = request.data.get("id")
-        if not review_id:
-            return Response({"error": "Review ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
-
-        review = get_object_or_404(Reviews, pk=review_id)
+    def delete(self, request, pk):
+        review = get_object_or_404(Reviews, pk=pk)
         review.delete()
-        return Response({"success": f"Review with ID {review_id} has been deleted."}, status=status.HTTP_200_OK)
+        return Response({"success": f"Review with ID {pk} has been deleted."}, status=status.HTTP_200_OK)
 
 
 class InventoryView(APIView):
+    permission_classes = [IsAuthenticated]  
+
     def get(self, request, pk=None):
         if pk:
             inventory = get_object_or_404(Inventory, pk=pk)
@@ -109,29 +165,22 @@ class InventoryView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, pk=None):
-        inventory_id = request.data.get("id")
-        if not inventory_id:
-            return Response({"error": "Inventory ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
-
-        inventory = get_object_or_404(Inventory, pk=inventory_id)
+    def put(self, request, pk):
+        inventory = get_object_or_404(Inventory, pk=pk)
         serializer = InventorySerializer(inventory, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk=None):
-        inventory_id = request.data.get("id")
-        if not inventory_id:
-            return Response({"error": "Inventory ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
-
-        inventory = get_object_or_404(Inventory, pk=inventory_id)
+    def delete(self, request, pk):
+        inventory = get_object_or_404(Inventory, pk=pk)
         inventory.delete()
-        return Response({"success": f"Inventory with ID {inventory_id} has been deleted."}, status=status.HTTP_200_OK)
+        return Response({"success": f"Inventory with ID {pk} has been deleted."}, status=status.HTTP_200_OK)
 
 
 class OrderView(APIView):
+    permission_classes = [IsAuthenticated]  
     def get(self, request, pk=None):
         if pk:
             order = get_object_or_404(Order, pk=pk)
@@ -148,29 +197,22 @@ class OrderView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, pk=None):
-        order_id = request.data.get("id")
-        if not order_id:
-            return Response({"error": "Order ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
-
-        order = get_object_or_404(Order, pk=order_id)
+    def put(self, request, pk):
+        order = get_object_or_404(Order, pk=pk)
         serializer = OrderSerializer(order, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk=None):
-        order_id = request.data.get("id")
-        if not order_id:
-            return Response({"error": "Order ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
-
-        order = get_object_or_404(Order, pk=order_id)
+    def delete(self, request, pk):
+        order = get_object_or_404(Order, pk=pk)
         order.delete()
-        return Response({"success": f"Order with ID {order_id} has been deleted."}, status=status.HTTP_200_OK)
+        return Response({"success": f"Order with ID {pk} has been deleted."}, status=status.HTTP_200_OK)
 
 
 class OrderItemView(APIView):
+    permission_classes = [IsAuthenticated]  
     def get(self, request, pk=None):
         if pk:
             order_item = get_object_or_404(OrderItem, pk=pk)
@@ -187,38 +229,27 @@ class OrderItemView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, pk=None):
-        order_item_id = request.data.get("id")
-        if not order_item_id:
-            return Response({"error": "OrderItem ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
-
-        order_item = get_object_or_404(OrderItem, pk=order_item_id)
+    def put(self, request, pk):
+        order_item = get_object_or_404(OrderItem, pk=pk)
         serializer = OrderItemSerializer(order_item, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk=None):
-        order_item_id = request.data.get("id")
-        if not order_item_id:
-            return Response({"error": "OrderItem ID is required in the JSON body"}, status=status.HTTP_400_BAD_REQUEST)
-
-        order_item = get_object_or_404(OrderItem, pk=order_item_id)
+    def delete(self, request, pk):
+        order_item = get_object_or_404(OrderItem, pk=pk)
         order_item.delete()
-        return Response({"success": f"OrderItem with ID {order_item_id} has been deleted."}, status=status.HTTP_200_OK)
+        return Response({"success": f"OrderItem with ID {pk} has been deleted."}, status=status.HTTP_200_OK)
 
 
 User = get_user_model()
 
 class UserView(APIView):
+    permission_classes = [IsAuthenticated]  
     def post(self, request):
-        # Use the UserSerializer to validate the request data
         serializer = UserSerializer(data=request.data)
-        
         if serializer.is_valid():
-            # Save the user instance
             user = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

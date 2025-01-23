@@ -2,6 +2,9 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from . import views
+from .views import  LoginView
+from .views import register
+
 
 urlpatterns = [
     path('mobile/', views.ProductView.as_view(), name='ProductView'), 
@@ -11,6 +14,8 @@ urlpatterns = [
     path('order-item/', views.OrderItemView.as_view(), name='OrderItemView'), 
     path('user/', views.UserView.as_view(), name='user-create'),
 
+    path('register/',register, name='register'),
+    path('login/', LoginView.as_view(), name='login'),
 ]
 
 if settings.DEBUG:

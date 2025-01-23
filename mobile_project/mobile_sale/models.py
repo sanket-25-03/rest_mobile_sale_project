@@ -23,7 +23,8 @@ class User(AbstractUser):
         constraints = [
             models.UniqueConstraint(fields=['username', 'email'], name='unique_username_email')
         ]
-
+    def __str__(self):
+        return self.email
 
 class Product(models.Model):
     prod_image = models.ImageField(upload_to='products/', null=True, blank=True)
