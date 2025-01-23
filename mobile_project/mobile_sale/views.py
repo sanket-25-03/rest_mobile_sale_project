@@ -1,4 +1,5 @@
 from rest_framework.exceptions import APIException
+from rest_framework.generics import GenericAPIView
 from django.db import IntegrityError
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
@@ -14,10 +15,11 @@ from django.db import IntegrityError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 
-class ProductView(APIView):
+class ProductView(GenericAPIView):
     # authentication_classes = [TokenAuthentication]
 
     # permission_classes = [IsAuthenticated]
+    serializer_class = ProductSerializer
     def get(self, request, pk=None):
         if pk:
             product = get_object_or_404(Product, pk=pk)
