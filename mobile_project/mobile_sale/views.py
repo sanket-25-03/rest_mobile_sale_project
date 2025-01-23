@@ -63,9 +63,10 @@ class ProductView(GenericAPIView):
         product.delete()
         return Response({"success": f"Product with ID {product_id} has been deleted."}, status=status.HTTP_200_OK)
 
-class ReviewView(APIView):
+class ReviewView(GenericAPIView):
     # authentication_classes = [TokenAuthentication]
     # permission_classes = [IsAuthenticated]
+    serializer_class = ReviewSerializer
 
     def get(self, request, pk=None):
         if pk:
@@ -96,9 +97,10 @@ class ReviewView(APIView):
         review.delete()
         return Response({"success": "Review deleted."}, status=status.HTTP_200_OK)
 
-class InventoryView(APIView):
+class InventoryView(GenericAPIView):
     # authentication_classes = [TokenAuthentication]
     # permission_classes = [IsAuthenticated]
+    serializer_class = InventorySerializer
 
     def get(self, request, pk=None):
         if pk:
@@ -140,9 +142,10 @@ class InventoryView(APIView):
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 
-class OrderView(APIView):
+class OrderView(GenericAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializer
 
     def get(self, request, pk=None):
         if pk:
@@ -173,7 +176,8 @@ class OrderView(APIView):
         order.delete()
         return Response({"success": "Order deleted."}, status=status.HTTP_200_OK)
 
-class RegisterAPI(APIView):
+class RegisterAPI(GenericAPIView):
+    serializer_class = RegisterSerializer
     def post(self, request):
         data = request.data
         serializer = RegisterSerializer(data=data)
@@ -190,7 +194,8 @@ class RegisterAPI(APIView):
             'user': UserSerializer(user).data
         }, status=status.HTTP_201_CREATED)
 
-class LoginAPI(APIView):
+class LoginAPI(GenericAPIView):
+    serializer_class = LoginSerializer
     def post(self, request):
         data = request.data
         serializer = LoginSerializer(data=data)
