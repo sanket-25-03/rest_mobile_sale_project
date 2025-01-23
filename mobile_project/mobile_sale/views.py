@@ -10,7 +10,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import GenericAPIView
 
-class ProductAPIView(APIView):
+class ProductAPIView(GenericAPIView):
+    serializer_class = ProductSerializer
     def get(self, request, pk=None):
         if pk:
             product = get_object_or_404(Product, pk=pk)
@@ -37,7 +38,8 @@ class ProductAPIView(APIView):
         product.delete()
         return Response({"success": f"Product with ID {pk} has been deleted."}, status=status.HTTP_200_OK)
 
-class ProductCreateAPIView(APIView):
+class ProductCreateAPIView(GenericAPIView):
+    serializer_class = ProductSerializer
     def post(self, request):
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
@@ -45,7 +47,8 @@ class ProductCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ReviewAPIView(APIView):
+class ReviewAPIView(GenericAPIView):
+    serializer_class  = ReviewSerializer
     def get(self, request, pk=None):
         if pk:
             review = get_object_or_404(Reviews, pk=pk)
@@ -72,7 +75,8 @@ class ReviewAPIView(APIView):
         review.delete()
         return Response({"success": "Review deleted."}, status=status.HTTP_200_OK)
 
-class ReviewCreateAPIView(APIView):
+class ReviewCreateAPIView(GenericAPIView):
+    serializer_class = ReviewSerializer
     def post(self, request):
         serializer = ReviewSerializer(data=request.data)
         if serializer.is_valid():
@@ -80,7 +84,8 @@ class ReviewCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class InventoryAPIView(APIView):
+class InventoryAPIView(GenericAPIView):
+    serializer_class = InventorySerializer
     def get(self, request, pk=None):
         if pk:
             inventory = get_object_or_404(Inventory, pk=pk)
@@ -107,7 +112,8 @@ class InventoryAPIView(APIView):
         inventory.delete()
         return Response({"success": f"Inventory with ID {pk} has been deleted."}, status=status.HTTP_200_OK)
 
-class InventoryCreateAPIView(APIView):
+class InventoryCreateAPIView(GenericAPIView):
+    serializer_class   = InventorySerializer
     def post(self, request):
         serializer = InventorySerializer(data=request.data)
         if serializer.is_valid():
@@ -115,7 +121,8 @@ class InventoryCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class OrderAPIView(APIView):
+class OrderAPIView(GenericAPIView):
+    serializer_class = OrderSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -145,7 +152,8 @@ class OrderAPIView(APIView):
         order.delete()
         return Response({"success": "Order deleted."}, status=status.HTTP_200_OK)
 
-class OrderCreateAPIView(APIView):
+class OrderCreateAPIView(GenericAPIView):
+    serializer_class = OrderSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
