@@ -59,7 +59,6 @@ class Order(models.Model):
         ('delivered', 'Delivered'),
         ('canceled', 'Canceled'),
     ]
-    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now_add=True)
     shipping_address = models.TextField()
