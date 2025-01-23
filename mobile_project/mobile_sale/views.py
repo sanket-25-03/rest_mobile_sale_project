@@ -15,9 +15,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 
 class ProductView(APIView):
-    authentication_classes = [TokenAuthentication]
+    # authentication_classes = [TokenAuthentication]
 
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     def get(self, request, pk=None):
         if pk:
             product = get_object_or_404(Product, pk=pk)
@@ -62,8 +62,8 @@ class ProductView(APIView):
         return Response({"success": f"Product with ID {product_id} has been deleted."}, status=status.HTTP_200_OK)
 
 class ReviewView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request, pk=None):
         if pk:
@@ -95,8 +95,8 @@ class ReviewView(APIView):
         return Response({"success": "Review deleted."}, status=status.HTTP_200_OK)
 
 class InventoryView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request, pk=None):
         if pk:
