@@ -17,10 +17,8 @@ class FirstTestCase(TestCase):
 
 class RegisterViewTest(TestCase):
     def setUp(self):
-        # Initialize the client
         self.client = Client()
-        self.register_url = '/register/'  # Update with the actual endpoint if necessary
-
+        self.register_url = '/register/'  
     def test_register_success(self):
         data = {
             'username': 'testuser',
