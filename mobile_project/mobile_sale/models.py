@@ -39,7 +39,7 @@ class Reviews(models.Model):
 
 
 class Inventory(models.Model):
-    product = models.OneToOneField('Product', on_delete=models.CASCADE, related_name='inventory')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='inventory')    
     imei_number = models.CharField(max_length=15, unique=True)
     detailed_info = models.TextField()
     stock_quantity = models.PositiveIntegerField(default=0)
