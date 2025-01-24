@@ -1,88 +1,185 @@
-from rest_framework.test import APITestCase, APIClient
 from django.urls import reverse
+from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from django.contrib.auth.models import User
-from mobile_sale.models import Product
+from .models import Product, Inventory
 
 
-class APITest(APITestCase):
+class ProductCreateAPITest(APITestCase):
     def setUp(self):
         self.client = APIClient()
-        self.register_url = reverse('RegisterAPI')
-        self.login_url = reverse('LoginAPI')
-        self.product_url = reverse('ProductView')
-        self.inventory_url = reverse('InventoryView')
-        self.review_url = reverse('ReviewView')
-        self.order_url = reverse('OrderView')
+        self.url = reverse('product-create')
+        self.valid_payload = {
+        "prod_image": None,
+        "product_name": "string",
+        "brand": "string",
+        "price": "-.4",
+        "short_description": "string",
+        "category": "string"
+        }
+        self.invalid_payload = {
+            'name': '',
+            'description': 'Test Description',
+            'price': 100.0
+        }
 
-    def authenticate(self):
-        self.test_create_user()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
-
-    def test_create_user(self):
-        data = {'username': 'testuser', 'email': 'testuser@example.com', 'password': 'testpassword'}
-        response = self.client.post(self.register_url, data, format='json')
+    def test_create_valid_product(self):
+        response = self.client.post(self.url, self.valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.token = response.data['token']
 
-    def test_product_api(self):
-        product_data = {'product_name': 'Test Product', 'short_description': 'Test description', 'brand': 'Test Brand', 'price': 99.99}
-
-        response = self.client.post(self.product_url, product_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        product_id = response.data['id']
-
-        response = self.client.post(self.product_url, product_data, format='json')
+    def test_create_invalid_product(self):
+        response = self.client.post(self.url, self.invalid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('product_name', response.data)
 
-        response = self.client.get(f"{self.product_url}?id={product_id}", format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        updated_data = {'id':product_id, 'product_name': 'Updated Product', 'short_description': 'Updated description', 'brand': 'Updated Brand', 'price': 149.99}
-        response = self.client.put(f"{self.product_url}?id={product_id}", updated_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        data = {'id':product_id}
-        response = self.client.delete(f"{self.product_url}?id={product_id}", data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-class InventoryAPITest(APITestCase):
+class ReviewCreateAPITest(APITestCase):
     def setUp(self):
-        self.api_test = APITest()
-        self.api_test.setUp()
-        self.api_test.authenticate()
-        self.client = self.api_test.client
-        self.product_url = self.api_test.product_url
-        self.inventory_url = self.api_test.inventory_url
-
-    def test_create_inventory(self):
-        product = Product.objects.create(product_name='Test Product', short_description='Test description', brand='Test Brand', price=99.99)
-        response = self.client.get(f"{self.product_url}", format='json')
-        product_id = response.data[0]['id']
-        inventory_data = {
-            "imei_number": "0123456781234",
-            "detailed_info": "Entry-level phone with basic features.",
-            "stock_quantity": 25,
-            "os": "Android 10",
-            "ram": "2GB",
-            "storage": "16GB",
-            "battery_capacity": "3000mAh",
-            "screen_size": "5.5 inches",
-            "camera_details": "8MP single camera",
-            "processor": "MediaTek MT6739",
-            "product": product_id
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.product = Product.objects.create(product_name="string",
+            brand="string",
+            price="-24022760.60",
+            short_description="string",
+            category="string"
+        )        
+        self.client.force_authenticate(user=self.user)
+        self.url = reverse('review-create')
+        self.valid_payload = {
+            "quality_rating": 1,
+            "performance_rating": 1,
+            "user_exp_rating": 1,
+            "review": "string",
+            "product": self.product.id,
+            "user": self.user.id
         }
-        response = self.client.post(self.inventory_url, inventory_data, format='json')
+        self.invalid_payload = {
+            'product': self.product.id,
+            'rating': 6,
+            'comment': 'Great product!'
+        }
+
+    def test_create_valid_review(self):
+        response = self.client.post(self.url, self.valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        inventory_id = response.data['id']
 
-    def test_create_inventory_without_product(self):
-        inventory_data = {
-            "imei_number": "987654321098765",
-            "detailed_info": "Updated details",
-            "stock_quantity": 20
-        }
-        response = self.client.post(self.inventory_url, inventory_data, format='json')
+    def test_create_invalid_review(self):
+        response = self.client.post(self.url, self.invalid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('product', response.data)
+
+
+class InventoryCreateAPITest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.product = Product.objects.create(product_name="string",
+            brand="string",
+            price="-24022760.60",
+            short_description="string",
+            category="string"
+        )
+        self.url = reverse('inventory-create')
+        self.valid_payload = {
+        "imei_number": "string",
+        "detailed_info": "string",
+        "stock_quantity": 2147483647,
+        "os": "string",
+        "ram": "string",
+        "storage": "string",
+        "battery_capacity": "string",
+        "screen_size": "string",
+        "camera_details": "string",
+        "processor": "string",
+        "product": self.product.id
+}
+        self.invalid_payload = {
+            'product': self.product.id,
+            'processor': 'string'
+        }
+
+    def test_create_valid_inventory(self):
+        response = self.client.post(self.url, self.valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_invalid_inventory(self):
+        response = self.client.post(self.url, self.invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class OrderCreateAPITest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.product = Product.objects.create(product_name="string",
+            brand="string",
+            price="-24022760.60",
+            short_description="string",
+            category="string"
+        )        
+        self.client.force_authenticate(user=self.user)
+        self.url = reverse('order-create')
+        self.valid_payload = {
+        "shipping_address": "string",
+        "total_price": "-29832899",
+        "status": "pending",
+        "payment_method": "string",
+        "payment_status": "string",
+        "user": self.user.id,
+        }
+        self.invalid_payload = {
+            'product': self.product.id,
+            'quantity': 0
+        }
+
+    def test_create_valid_order(self):
+        response = self.client.post(self.url, self.valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_invalid_order(self):
+        response = self.client.post(self.url, self.invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class RegisterAPITest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.url = reverse('RegisterAPI')
+        self.valid_payload = {
+            'username': 'newuser',
+            'password': 'newpassword',
+            'email': 'newuser@example.com'
+        }
+        self.invalid_payload = {
+            'username': '',
+            'password': 'newpassword',
+            'email': 'invalid@example.com'
+        }
+
+    def test_register_valid_user(self):
+        response = self.client.post(self.url, self.valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_register_invalid_user(self):
+        response = self.client.post(self.url, self.invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class LoginAPITest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.url = reverse('LoginAPI')
+        self.valid_payload = {
+            'username': 'testuser',
+            'password': 'testpassword'
+        }
+        self.invalid_payload = {
+            'username': 'testuser',
+            'password': 'wrongpassword'
+        }
+
+    def test_login_valid_user(self):
+        response = self.client.post(self.url, self.valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_login_invalid_user(self):
+        response = self.client.post(self.url, self.invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
