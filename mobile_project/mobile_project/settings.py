@@ -143,5 +143,5 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Your API Title',
     'DESCRIPTION': 'Your API Description',
     'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': True,  # Exclude the schema from being served as JSON
+    'SERVE_INCLUDE_SCHEMA': False,
 }

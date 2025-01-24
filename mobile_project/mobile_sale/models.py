@@ -1,6 +1,8 @@
 from django.db import models
 from django.db.models import Avg, Count
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 
 class Product(models.Model):
     prod_image = models.ImageField(upload_to='products/', null=True, blank=True)
@@ -21,7 +23,6 @@ class Product(models.Model):
         self.reviews_count = reviews_data['count_reviews']
         self.save()
 
-
 class Reviews(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
@@ -36,7 +37,6 @@ class Reviews(models.Model):
     def save(self, *args, **kwargs):
         self.overall_rating = (self.quality_rating + self.performance_rating + self.user_exp_rating) / 3
         super().save(*args, **kwargs)
-
 
 class Inventory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='inventory')    
@@ -70,13 +70,10 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
     
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
+
 
 @receiver(post_save, sender=Reviews)
 @receiver(post_delete, sender=Reviews)
 def update_product_ratings(sender, instance, **kwargs):
     product = instance.product
     product.update_ratings()
-
-
