@@ -1,72 +1,164 @@
-from django.test import TestCase
-from .models import *
-from faker import Faker
-fake = Faker()
-from django.test import TestCase, Client
+from django.urls import reverse
+from rest_framework.test import APITestCase, APIClient
+from rest_framework import status
 from django.contrib.auth.models import User
-import json
+from .models import Product
 
-class FirstTestCase(TestCase):
-    
+class ProductCreateAPITest(APITestCase):
     def setUp(self):
-        print('setup called')
+        self.client = APIClient()
+        self.url = reverse('product-create')
+        self.valid_payload = {
+            "prod_image": None,
+            "product_name": "string",
+            "brand": "string",
+            "price": "-.4",
+            "short_description": "string",
+            "category": "string"
+        }
+        self.invalid_payload = {
+            'name': '',
+            'description': 'Test Description',
+            'price': 100.0
+        }
 
-    def test_equal(self):
-        self.assertEqual(1,1)
+    def test_create_valid_product(self):
+        response = self.client.post(self.url, self.valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_create_invalid_product(self):
+        response = self.client.post(self.url, self.invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-class RegisterViewTest(TestCase):
+class ReviewCreateAPITest(APITestCase):
     def setUp(self):
-        self.client = Client()
-        self.register_url = '/register/'  
-    def test_register_success(self):
-        data = {
-            'username': 'testuser',
-            'password': 'testpassword',
-            'email': 'testuser@example.com'
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.product = Product.objects.create(product_name="string", brand="string", price="-24022760.60", short_description="string", category="string")        
+        self.client.force_authenticate(user=self.user)
+        self.url = reverse('review-create')
+        self.valid_payload = {
+            "quality_rating": 1,
+            "performance_rating": 1,
+            "user_exp_rating": 1,
+            "review": "string",
+            "product": self.product.id,
+            "user": self.user.id
         }
-        response = self.client.post(self.register_url, json.dumps(data), content_type='application/json')
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json().get('message'), 'User created successfully.')
-        print("test_register_success passed.")
-
-    def test_missing_fields(self):
-        data = {
-            'username': '',
-            'password': 'testpassword',
-            'email': 'testuser@example.com'
+        self.invalid_payload = {
+            'product': self.product.id,
+            'rating': 6,
+            'comment': 'Great product!'
         }
-        response = self.client.post(self.register_url, json.dumps(data), content_type='application/json')
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json().get('error'), 'All fields are required.')
-        print("test_missing_fields passed.")
 
-    def test_duplicate_username(self):
-        User.objects.create_user(username='testuser', password='testpassword', email='testuser@example.com')
-        data = {
-            'username': 'testuser',
-            'password': 'newpassword',
-            'email': 'newemail@example.com'
+    def test_create_valid_review(self):
+        response = self.client.post(self.url, self.valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_invalid_review(self):
+        response = self.client.post(self.url, self.invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+class InventoryCreateAPITest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.product = Product.objects.create(product_name="string", brand="string", price="-24022760.60", short_description="string", category="string")        
+        self.url = reverse('inventory-create')
+        self.valid_payload = {
+            "imei_number": "string",
+            "detailed_info": "string",
+            "stock_quantity": 2147483647,
+            "os": "string",
+            "ram": "string",
+            "storage": "string",
+            "battery_capacity": "string",
+            "screen_size": "string",
+            "camera_details": "string",
+            "processor": "string",
+            "product": self.product.id
+}
+        self.invalid_payload = {
+            'product': self.product.id,
+            'processor': 'string'
         }
-        response = self.client.post(self.register_url, json.dumps(data), content_type='application/json')
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json().get('error'), 'Username already exists.')
-        print("test_duplicate_username passed.")
 
-    def test_duplicate_email(self):
-        User.objects.create_user(username='testuser', password='testpassword', email='testuser@example.com')
-        data = {
+    def test_create_valid_inventory(self):
+        response = self.client.post(self.url, self.valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_invalid_inventory(self):
+        response = self.client.post(self.url, self.invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+class OrderCreateAPITest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.product = Product.objects.create(product_name="string", brand="string", price="-24022760.60", short_description="string", category="string")         
+        self.client.force_authenticate(user=self.user)
+        self.url = reverse('order-create')
+        self.valid_payload = {
+            "shipping_address": "string",
+            "total_price": "-29832899",
+            "status": "pending",
+            "payment_method": "string",
+            "payment_status": "string",
+            "user": self.user.id,
+        }
+        self.invalid_payload = {
+            'product': self.product.id,
+            'quantity': 0
+        }
+
+    def test_create_valid_order(self):
+        response = self.client.post(self.url, self.valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_invalid_order(self):
+        response = self.client.post(self.url, self.invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+class RegisterAPITest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.url = reverse('RegisterAPI')
+        self.valid_payload = {
             'username': 'newuser',
             'password': 'newpassword',
-            'email': 'testuser@example.com'
+            'email': 'newuser@example.com'
         }
-        response = self.client.post(self.register_url, json.dumps(data), content_type='application/json')
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json().get('error'), 'Email already exists.')
-        print("test_duplicate_email passed.")
+        self.invalid_payload = {
+            'username': '',
+            'password': 'newpassword',
+            'email': 'invalid@example.com'
+        }
 
-    def test_invalid_http_method(self):
-        response = self.client.get(self.register_url)
-        self.assertEqual(response.status_code, 405)
-        self.assertEqual(response.json().get('error'), 'Invalid HTTP method.')
-        print("test_invalid_http_method passed.")
+    def test_register_valid_user(self):
+        response = self.client.post(self.url, self.valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_register_invalid_user(self):
+        response = self.client.post(self.url, self.invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        
+class LoginAPITest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.url = reverse('LoginAPI')
+        self.valid_payload = {
+            'username': 'testuser',
+            'password': 'testpassword'
+        }
+        self.invalid_payload = {
+            'username': 'testuser',
+            'password': 'wrongpassword'
+        }
+
+    def test_login_valid_user(self):
+        response = self.client.post(self.url, self.valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_login_invalid_user(self):
+        response = self.client.post(self.url, self.invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

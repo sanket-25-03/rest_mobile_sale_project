@@ -1,22 +1,41 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from . import views
-from .views import  LoginView
-from .views import register
 
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
+from .views import (
+    ProductAPIView, ProductCreateAPIView,
+    ReviewAPIView, ReviewCreateAPIView,
+    InventoryAPIView, InventoryCreateAPIView,
+    OrderAPIView, OrderCreateAPIView,
+    RegisterAPI, LoginAPI
+)
 
 urlpatterns = [
-    path('mobile/', views.ProductView.as_view(), name='ProductView'), 
-    path('review/', views.ReviewView.as_view(), name='ReviewView'), 
-    path('Inventory/', views.InventoryView.as_view(), name='InventoryView'), 
-    path('order/', views.OrderView.as_view(), name='OrderView'), 
-    path('order-item/', views.OrderItemView.as_view(), name='OrderItemView'), 
-    path('user/', views.UserView.as_view(), name='user-create'),
+    path('mobile/', ProductCreateAPIView.as_view(), name='product-create'),
+    path('mobile/<int:pk>/', ProductAPIView.as_view(), name='product-detail'),
+    
+    path('review/', ReviewCreateAPIView.as_view(), name='review-create'),
+    path('review/<int:pk>/', ReviewAPIView.as_view(), name='review-detail'),
 
-    path('register/',register, name='register'),
-    path('login/', LoginView.as_view(), name='login'),
+    path('Inventory/', InventoryCreateAPIView.as_view(), name='inventory-create'),
+    path('Inventory/<int:pk>/', InventoryAPIView.as_view(), name='inventory-detail'),
+
+    path('order/', OrderCreateAPIView.as_view(), name='order-create'),
+    path('order/<int:pk>/', OrderAPIView.as_view(), name='order-detail'),
+
+    path('register/', RegisterAPI.as_view(), name='RegisterAPI'),
+    path('login/', LoginAPI.as_view(), name='LoginAPI'),
+
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
