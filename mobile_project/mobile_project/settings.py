@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,7 +40,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'mobile_sale.pagination.CustomPagination',  
+    'PAGE_SIZE': 10,  
 }
 
 MIDDLEWARE = [
@@ -144,4 +147,9 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Your API Description',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }

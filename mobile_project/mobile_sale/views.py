@@ -9,6 +9,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import GenericAPIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import LoginSerializer, UserSerializer
+from rest_framework.pagination import PageNumberPagination
+from django.contrib.auth.models import User
+from .pagination import CustomPagination
 
 class ProductAPIView(GenericAPIView):
     serializer_class = ProductSerializer
@@ -178,13 +183,7 @@ class RegisterAPI(GenericAPIView):
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key, 'user': UserSerializer(user).data}, status=status.HTTP_201_CREATED)
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
-from .serializers import LoginSerializer, UserSerializer
-
+#token
 class LoginAPI(APIView):
     serializer_class = LoginSerializer
 
@@ -210,3 +209,39 @@ class LoginAPI(APIView):
             'access_token_expiry': access_token_expiry,
             'refresh_token_expiry': refresh_token_expiry
         }, status=status.HTTP_200_OK)
+
+
+#pagination
+class UnifiedPaginatedAPI(GenericAPIView):
+    serializer_class = None
+    pagination_class = CustomPagination
+
+    def get(self, request):
+        model = request.query_params.get("model", "").lower()
+
+        if model == "product":
+            queryset = Product.objects.all()
+            serializer_class = ProductSerializer
+        elif model == "review":
+            queryset = Reviews.objects.all()
+            serializer_class = ReviewSerializer
+        elif model == "inventory":
+            queryset = Inventory.objects.all()
+            serializer_class = InventorySerializer
+        elif model == "order":
+            queryset = Order.objects.filter(user=request.user)
+            serializer_class = OrderSerializer
+        else:
+            return Response(
+                {"error": "Invalid model specified. Choose from ['product', 'review', 'inventory', 'order']."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request)
+        if page is not None:
+            serializer = serializer_class(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
+        serializer = serializer_class(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
