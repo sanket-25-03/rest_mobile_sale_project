@@ -231,9 +231,12 @@ class UnifiedPaginatedAPI(GenericAPIView):
         elif model == "order":
             queryset = Order.objects.filter(user=request.user)
             serializer_class = OrderSerializer
+        elif model == "user":
+            queryset = User.objects.all()
+            serializer_class = UserSerializer
         else:
             return Response(
-                {"error": "Invalid model specified. Choose from ['product', 'review', 'inventory', 'order']."},
+                {"error": "Invalid model specified. Choose from ['product', 'review', 'inventory', 'order', 'user']."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
