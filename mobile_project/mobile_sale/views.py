@@ -128,7 +128,6 @@ class InventoryCreateAPIView(GenericAPIView):
 
 class OrderAPIView(GenericAPIView):
     serializer_class = OrderSerializer
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk=None):
@@ -159,7 +158,6 @@ class OrderAPIView(GenericAPIView):
 
 class OrderCreateAPIView(GenericAPIView):
     serializer_class = OrderSerializer
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
