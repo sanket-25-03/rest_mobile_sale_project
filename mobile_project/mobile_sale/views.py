@@ -178,20 +178,35 @@ class RegisterAPI(GenericAPIView):
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key, 'user': UserSerializer(user).data}, status=status.HTTP_201_CREATED)
 
-class LoginAPI(GenericAPIView):
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
+from .serializers import LoginSerializer, UserSerializer
+
+class LoginAPI(APIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
         data = request.data
-        serializer = LoginSerializer(data=data)
-        
+        serializer = self.serializer_class(data=data)
+
         if not serializer.is_valid():
             return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         user = authenticate(username=serializer.validated_data['username'], password=serializer.validated_data['password'])
-        
+
         if not user:
             return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key, 'user': UserSerializer(user).data}, status=status.HTTP_200_OK)
+
+        refresh = RefreshToken.for_user(user)
+        access_token_expiry = refresh.access_token['exp'] * 1000  
+        refresh_token_expiry = refresh['exp'] * 1000
+
+        return Response({
+            'access_token': str(refresh.access_token),
+            'refresh_token': str(refresh),
+            'access_token_expiry': access_token_expiry,
+            'refresh_token_expiry': refresh_token_expiry
+        }, status=status.HTTP_200_OK)
