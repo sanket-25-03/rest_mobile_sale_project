@@ -113,7 +113,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'mobile_sale_database',
         'USER': 'postgres',  
-        'PASSWORD': 'sanket@123',  
+        'PASSWORD': 'pass123',  
         'HOST': 'localhost', 
         'PORT': '5432',  
     }
