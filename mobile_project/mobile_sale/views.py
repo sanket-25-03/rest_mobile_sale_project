@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import GenericAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.settings import api_settings
+from .pagination import CustomPagination
 
 
 class ProductAPIView(GenericAPIView):
@@ -43,9 +44,9 @@ class ProductAPIView(GenericAPIView):
         product.delete()
         return Response({"success": f"Product with ID {pk} has been deleted."}, status=status.HTTP_200_OK)
 
-
 class ProductCreateAPIView(GenericAPIView):
     serializer_class = ProductSerializer
+    pagination_class = CustomPagination
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -56,9 +57,10 @@ class ProductCreateAPIView(GenericAPIView):
 
     def get(self, request):
         products = Product.objects.all()
-        serializer = self.serializer_class(products, many=True)
-        return Response(serializer.data)
-
+        paginator = self.pagination_class()
+        paginated_products = paginator.paginate_queryset(products, request)
+        serializer = self.serializer_class(paginated_products, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 class ReviewAPIView(GenericAPIView):
     serializer_class = ReviewSerializer
@@ -89,10 +91,10 @@ class ReviewAPIView(GenericAPIView):
         review.delete()
         return Response({"success": "Review deleted."}, status=status.HTTP_200_OK)
 
-
 class ReviewCreateAPIView(GenericAPIView):
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -103,8 +105,10 @@ class ReviewCreateAPIView(GenericAPIView):
 
     def get(self, request):
         reviews = Reviews.objects.all()
-        serializer = self.serializer_class(reviews, many=True)
-        return Response(serializer.data)
+        paginator = self.pagination_class()
+        paginated_reviews = paginator.paginate_queryset(reviews, request)
+        serializer = self.serializer_class(paginated_reviews, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 class InventoryAPIView(GenericAPIView):
     serializer_class = InventorySerializer
@@ -135,10 +139,9 @@ class InventoryAPIView(GenericAPIView):
         inventory.delete()
         return Response({"success": f"Inventory with ID {pk} has been deleted."}, status=status.HTTP_200_OK)
 
-
-
 class InventoryCreateAPIView(GenericAPIView):
     serializer_class = InventorySerializer
+    pagination_class = CustomPagination
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -149,9 +152,10 @@ class InventoryCreateAPIView(GenericAPIView):
 
     def get(self, request):
         inventories = Inventory.objects.all()
-        serializer = self.serializer_class(inventories, many=True)
-        return Response(serializer.data)
-
+        paginator = self.pagination_class()
+        paginated_inventories = paginator.paginate_queryset(inventories, request)
+        serializer = self.serializer_class(paginated_inventories, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 class OrderAPIView(GenericAPIView):
     serializer_class = OrderSerializer
@@ -183,10 +187,10 @@ class OrderAPIView(GenericAPIView):
         order.delete()
         return Response({"success": "Order deleted."}, status=status.HTTP_200_OK)
 
-
 class OrderCreateAPIView(GenericAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -197,9 +201,11 @@ class OrderCreateAPIView(GenericAPIView):
 
     def get(self, request):
         orders = Order.objects.filter(user=request.user)
-        serializer = self.serializer_class(orders, many=True)
-        return Response(serializer.data)
-        
+        paginator = self.pagination_class()
+        paginated_orders = paginator.paginate_queryset(orders, request)
+        serializer = self.serializer_class(paginated_orders, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
 class RegisterAPI(GenericAPIView):
     serializer_class = RegisterSerializer
 
@@ -209,7 +215,6 @@ class RegisterAPI(GenericAPIView):
             user = serializer.save()
             return Response({'user': UserSerializer(user).data}, status=status.HTTP_201_CREATED)
         return Response({'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
 
 class LoginAPI(GenericAPIView):
     serializer_class = LoginSerializer
