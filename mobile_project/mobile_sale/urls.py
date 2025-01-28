@@ -1,6 +1,7 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
+from .views import UnifiedPaginatedAPI
 
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -34,6 +35,10 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
+    # using this fetch /api/unified/?model=    (product, review, inventory, order)
+    path('api/unified/', UnifiedPaginatedAPI.as_view(), name='unified-paginated-api'),
+    
 ]
 
 if settings.DEBUG:
