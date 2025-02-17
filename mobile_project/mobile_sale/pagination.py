@@ -9,6 +9,5 @@ class CustomPagination(PageNumberPagination):
     def get_paginated_response(self, data):
         return Response({
             'total_count': self.page.paginator.count, # total count of the queryset on page
-            # 'total_count' : self.page.paginator.object_list.count(),
             'data': data
         })
