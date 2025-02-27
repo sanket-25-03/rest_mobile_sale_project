@@ -62,3 +62,16 @@ def test_productupdate():
     response = client.put(url, valid_payload, format="json")
     assert response.status_code == 200
   
+@pytest.mark.django_db
+def test_productdelete():
+    client = APIClient()
+    product = Product.objects.create(
+        product_name="string",
+        brand="string",
+        price="-.4",
+        short_description="string",
+        category="string"
+    )
+    url = reverse("product-detail", kwargs={"pk": product.pk})
+    response = client.delete(url)
+    assert response.status_code == 200
