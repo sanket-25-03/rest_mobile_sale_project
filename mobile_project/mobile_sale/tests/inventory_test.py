@@ -68,7 +68,6 @@ def test_create_inventory(client):
 
 @pytest.mark.django_db
 def test_get_inventory_list(client, create_inventory):
-    """Test retrieving the inventory list."""
     url = reverse("inventory-create") 
 
     response = client.get(url)
