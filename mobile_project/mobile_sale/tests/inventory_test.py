@@ -73,7 +73,7 @@ def test_create_inventory(client):
 @pytest.mark.django_db
 def test_get_inventory_list(client, create_inventory):
     """Test retrieving the inventory list."""
-    url = reverse("inventory-create")  # Same URL as list view
+    url = reverse("inventory-create") 
 
     response = client.get(url)
     assert response.status_code == 200
@@ -92,9 +92,9 @@ def test_get_single_inventory(client, create_inventory):
 @pytest.mark.parametrize(
     "update_data, expected_status",
     [
-        ({"stock_quantity": 20}, 200),  # Valid update
-        ({"imei_number": ""}, 400),  # Invalid IMEI (empty)
-        ({"imei_number": "invalid-imei"}, 400),  # Invalid IMEI format
+        ({"stock_quantity": 20}, 200),  
+        ({"imei_number": ""}, 400),  
+        ({"imei_number": "invalid-imei"}, 400),  
     ]
 )
 def test_update_inventory(client, create_inventory, update_data, expected_status):
@@ -102,7 +102,7 @@ def test_update_inventory(client, create_inventory, update_data, expected_status
     url = reverse("inventory-detail", kwargs={"pk": create_inventory.id})
 
     response = client.put(url, update_data, format="json")
-    print("Response Data:", response.data)  # Debugging line
+    print("Response Data:", response.data)  
 
     assert response.status_code == expected_status, f"Expected {expected_status}, got {response.status_code}. Response: {response.data}"
 
