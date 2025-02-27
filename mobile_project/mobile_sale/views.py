@@ -14,6 +14,8 @@ from .serializers import LoginSerializer, UserSerializer
 from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth.models import User
 from .pagination import CustomPagination
+from rest_framework.generics import ListCreateAPIView
+
 
 class ProductAPIView(GenericAPIView):
     serializer_class = ProductSerializer
@@ -94,20 +96,22 @@ class InventoryAPIView(GenericAPIView):
     def get(self, request, pk=None):
         if pk:
             inventory = get_object_or_404(Inventory, pk=pk)
-            serializer = InventorySerializer(inventory)
+            serializer = self.serializer_class(inventory)
         else:
             inventories = Inventory.objects.all()
-            serializer = InventorySerializer(inventories, many=True)
-        return Response(serializer.data)
+            serializer = self.serializer_class(inventories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk=None):
         if not pk:
             return Response({"message": "ID is required for update"}, status=status.HTTP_400_BAD_REQUEST)
         inventory = get_object_or_404(Inventory, pk=pk)
-        serializer = InventorySerializer(inventory, data=request.data, partial=True)
+        serializer = self.serializer_class(inventory, data=request.data, partial=True)
+
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk=None):
@@ -117,14 +121,10 @@ class InventoryAPIView(GenericAPIView):
         inventory.delete()
         return Response({"success": f"Inventory with ID {pk} has been deleted."}, status=status.HTTP_200_OK)
 
-class InventoryCreateAPIView(GenericAPIView):
-    serializer_class   = InventorySerializer
-    def post(self, request):
-        serializer = InventorySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class InventoryCreateAPIView(ListCreateAPIView):
+    queryset = Inventory.objects.all()
+    serializer_class = InventorySerializer
+
 
 class OrderAPIView(GenericAPIView):
     serializer_class = OrderSerializer

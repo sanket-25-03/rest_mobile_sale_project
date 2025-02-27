@@ -20,10 +20,14 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class InventorySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Inventory
         fields = '__all__'
+
+    def validate_imei_number(self, value):
+        if not value.isdigit() or len(value) != 15:
+            raise serializers.ValidationError("IMEI number must be a 15-digit numeric string.")
+        return value
 
 class OrderSerializer(serializers.ModelSerializer):
 
