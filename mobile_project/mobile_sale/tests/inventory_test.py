@@ -6,13 +6,11 @@ from mobile_sale.models import Product, Inventory
 @pytest.mark.django_db
 @pytest.fixture
 def client():
-    """Fixture to create API client for tests."""
     return APIClient()
 
 @pytest.mark.django_db
 @pytest.fixture
 def create_product():
-    """Fixture to create a test product."""
     return Product.objects.create(
         product_name="Test Phone",
         brand="Test Brand",
@@ -24,7 +22,6 @@ def create_product():
 @pytest.mark.django_db
 @pytest.fixture
 def create_inventory(create_product):
-    """Fixture to create a test inventory item linked to a product."""
     return Inventory.objects.create(
         product=create_product,
         imei_number="123456789012345",
@@ -41,7 +38,6 @@ def create_inventory(create_product):
 
 @pytest.mark.django_db
 def test_create_inventory(client):
-    """Test creating an inventory item."""
     url = reverse("inventory-create")
 
     product = Product.objects.create(
@@ -81,7 +77,6 @@ def test_get_inventory_list(client, create_inventory):
 
 @pytest.mark.django_db
 def test_get_single_inventory(client, create_inventory):
-    """Test retrieving a single inventory item."""
     url = reverse("inventory-detail", kwargs={"pk": create_inventory.id})
 
     response = client.get(url)
@@ -98,7 +93,6 @@ def test_get_single_inventory(client, create_inventory):
     ]
 )
 def test_update_inventory(client, create_inventory, update_data, expected_status):
-    """Test updating an inventory item."""
     url = reverse("inventory-detail", kwargs={"pk": create_inventory.id})
 
     response = client.put(url, update_data, format="json")
@@ -108,7 +102,6 @@ def test_update_inventory(client, create_inventory, update_data, expected_status
 
 @pytest.mark.django_db
 def test_delete_inventory(client, create_inventory):
-    """Test deleting an inventory item."""
     url = reverse("inventory-detail", kwargs={"pk": create_inventory.id})
 
     response = client.delete(url)
