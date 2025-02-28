@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Product, Reviews, Inventory, Order
 from django.contrib.auth.models import User
+from .validators import validate_imei_number
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -8,26 +9,51 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProductSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Product
         fields = '__all__'
+    # Field-Level Validation
+    def validate_price(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Price must be greater than zero.")
+        return value
 
 class ReviewSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Reviews
         fields = '__all__'
+    #Object-Level Validation 
+        read_only_fields = ['overall_rating', 'user']  # Prevent users from manually setting these fields
 
+    def validate(self, data):
+        quality_rating = data.get('quality_rating')
+        performance_rating = data.get('performance_rating')
+        user_exp_rating = data.get('user_exp_rating')
+        review = data.get('review')
+
+        # Validate individual rating fields
+        for field_name, value in {
+            "quality_rating": quality_rating,
+            "performance_rating": performance_rating,
+            "user_exp_rating": user_exp_rating,
+        }.items():
+            if value and (value < 1 or value > 5):
+                raise serializers.ValidationError({field_name: "Rating must be between 1 and 5."})
+
+        # Validate review length
+        if review and len(review.strip()) < 10:
+            raise serializers.ValidationError({"review": "Review must be at least 10 characters long."})
+
+        return data
+    
+    
 class InventorySerializer(serializers.ModelSerializer):
+    imei_number = serializers.CharField(validators=[validate_imei_number])  
+    # Custom validator 
     class Meta:
         model = Inventory
         fields = '__all__'
-
-    def validate_imei_number(self, value):
-        if not value.isdigit() or len(value) != 15:
-            raise serializers.ValidationError("IMEI number must be a 15-digit numeric string.")
-        return value
+    
 
 class OrderSerializer(serializers.ModelSerializer):
 

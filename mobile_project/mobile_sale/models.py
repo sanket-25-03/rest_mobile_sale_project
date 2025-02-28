@@ -3,6 +3,8 @@ from django.db.models import Avg, Count
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+from .validators import validate_imei_number
+
 
 class Product(models.Model):
     prod_image = models.ImageField(upload_to='products/', null=True, blank=True)
@@ -38,9 +40,10 @@ class Reviews(models.Model):
         self.overall_rating = (self.quality_rating + self.performance_rating + self.user_exp_rating) / 3
         super().save(*args, **kwargs)
 
+
 class Inventory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='inventory')    
-    imei_number = models.CharField(max_length=15, unique=True)
+    imei_number = models.CharField(max_length=15, unique=True, validators=[validate_imei_number])
     detailed_info = models.TextField()
     stock_quantity = models.PositiveIntegerField(default=0)
     os = models.CharField(max_length=50, verbose_name="Operating System")
